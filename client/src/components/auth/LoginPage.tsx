@@ -101,12 +101,12 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToSignup }) => {
   };
 
   return (
-    <div className="min-h-screen bg-light-bg dark:bg-dark-bg transition-colors duration-300 flex items-center justify-center p-4 font-medical">
+    <div className="min-h-screen bg-white/10 rounded-t-2xl dark:bg-dark-bg transition-colors duration-300 flex items-center justify-center p-4 font-medical" style={{ margin: '65px' }}>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-md"
+        className="w-full h-full"
       >
         {/* Medical Header */}
         <div className="text-center mb-8">
@@ -137,7 +137,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToSignup }) => {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.1 }}
-          className="bg-surface-light/80 dark:bg-surface-dark/80 backdrop-blur-xl rounded-2xl border border-light-border/50 dark:border-dark-border/50 shadow-medical dark:shadow-medical-dark p-8"
+          className="bg-white/10 dark:bg-surface-dark/80 backdrop-blur-xl rounded-2xl border border-light-border/50 dark:border-dark-border/50 shadow-medical dark:shadow-medical-dark p-8 w-full h-full"
         >
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Medical Role Selection */}
@@ -145,7 +145,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToSignup }) => {
               <label className="block text-sm font-medium text-light-text-primary dark:text-dark-text-primary mb-3">
                 Select Your Medical Role
               </label>
-              <div className="flex flex-wrap gap-3">
+              <div className="flex gap-3 w-full overflow-x-auto">
                 {roles.map((role) => {
                   const Icon = role.icon;
                   return (
@@ -155,7 +155,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToSignup }) => {
                       onClick={() => setSelectedRole(role.id)}
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      className={`flex-1 min-w-[140px] p-4 rounded-xl border-2 transition-all duration-300 ${
+                      className={`flex-1 min-w-[180px] p-4 rounded-xl border-2 transition-all duration-300 ${
                         selectedRole === role.id
                           ? 'border-brand-500 bg-brand-50/50 dark:bg-brand-900/20 shadow-medical dark:shadow-medical-dark'
                           : 'border-light-border dark:border-dark-border bg-surface-light/30 dark:bg-surface-dark/30 hover:border-brand-300 dark:hover:border-brand-600'
@@ -176,42 +176,45 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToSignup }) => {
               </div>
             </div>
 
-            {/* Medical Email Input */}
-            <div>
-              <label className="block text-sm font-medium text-light-text-primary dark:text-dark-text-primary mb-2">
-                Medical Email Address
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="doctor@hospital.com"
-                className="w-full px-4 py-3 bg-surface-light/50 dark:bg-surface-dark/50 border border-light-border/50 dark:border-dark-border/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500/50 transition-all text-light-text-primary dark:text-dark-text-primary placeholder-light-text-muted dark:placeholder-dark-text-muted"
-                required
-              />
-            </div>
-
-            {/* Medical Password Input */}
-            <div>
-              <label className="block text-sm font-medium text-light-text-primary dark:text-dark-text-primary mb-2">
-                Secure Password
-              </label>
-              <div className="relative">
+            {/* Medical Email and Password Input */}
+            <div className="flex flex-col md:flex-row gap-4">
+              {/* Medical Email Input */}
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-light-text-primary dark:text-dark-text-primary mb-2">
+                  Medical Email Address
+                </label>
                 <input
-                  type={showPassword ? 'text' : 'password'}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Enter your secure password"
-                  className="w-full px-4 py-3 bg-surface-light/50 dark:bg-surface-dark/50 border border-light-border/50 dark:border-dark-border/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500/50 transition-all pr-12 text-light-text-primary dark:text-dark-text-primary placeholder-light-text-muted dark:placeholder-dark-text-muted"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="doctor@hospital.com"
+                  className="w-full px-4 py-3 bg-surface-light/50 dark:bg-surface-dark/50 border border-light-border/50 dark:border-dark-border/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500/50 transition-all text-light-text-primary dark:text-dark-text-primary placeholder-light-text-muted dark:placeholder-dark-text-muted"
                   required
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-light-text-muted dark:text-dark-text-muted hover:text-light-text-secondary dark:hover:text-dark-text-secondary transition-colors"
-                >
-                  {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                </button>
+              </div>
+
+              {/* Medical Password Input */}
+              <div className="flex-1">
+                <label className="block text-sm font-medium text-light-text-primary dark:text-dark-text-primary mb-2">
+                  Secure Password
+                </label>
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter your secure password"
+                    className="w-full px-4 py-3 bg-surface-light/50 dark:bg-surface-dark/50 border border-light-border/50 dark:border-dark-border/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500/50 transition-all pr-12 text-light-text-primary dark:text-dark-text-primary placeholder-light-text-muted dark:placeholder-dark-text-muted"
+                    required
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-light-text-muted dark:text-dark-text-muted hover:text-light-text-secondary dark:hover:text-dark-text-secondary transition-colors"
+                  >
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
               </div>
             </div>
 

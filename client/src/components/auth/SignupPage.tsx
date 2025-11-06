@@ -224,7 +224,7 @@ const SignupPage: React.FC<SignupPageProps> = ({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
-        className="w-full max-w-2xl"
+        className="w-full"
       >
         {/* Medical Back Button */}
         {onBackToLanding && (
@@ -242,26 +242,14 @@ const SignupPage: React.FC<SignupPageProps> = ({
 
         {/* Medical Header */}
         <div className="text-center mb-8">
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.5 }}
-            className="w-16 h-16 bg-gradient-to-br from-brand-500 to-accent-blue-light dark:to-accent-blue-dark rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-medical dark:shadow-medical-dark"
-          >
-            <Stethoscope className="w-8 h-8 text-white" />
-          </motion.div>
+         
           <h1 className="text-3xl font-bold bg-gradient-to-r from-brand-600 to-accent-blue-light dark:from-brand-400 dark:to-accent-blue-dark bg-clip-text text-transparent mb-2">
             Join MedQuery Agent
           </h1>
           <p className="text-light-text-secondary dark:text-dark-text-secondary">
             Create your professional medical account
           </p>
-          <div className="mt-3 inline-flex items-center px-3 py-1 bg-brand-100/50 dark:bg-brand-900/30 rounded-full">
-            <Activity className="w-3 h-3 text-brand-600 dark:text-brand-400 mr-1" />
-            <span className="text-xs font-medium text-brand-700 dark:text-brand-300">
-              Secure Medical Registration
-            </span>
-          </div>
+          
         </div>
 
         {/* Medical Signup Form */}
@@ -274,10 +262,8 @@ const SignupPage: React.FC<SignupPageProps> = ({
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Medical Role Selection */}
             <div>
-              <label className="block text-sm font-medium text-light-text-primary dark:text-dark-text-primary mb-3">
-                Select Your Medical Role
-              </label>
-              <div className="grid grid-cols-2 gap-3">
+             
+              <div className="flex gap-3 w-full overflow-x-auto">
                 {roles.map((role) => {
                   const Icon = role.icon;
                   return (
@@ -287,15 +273,13 @@ const SignupPage: React.FC<SignupPageProps> = ({
                       onClick={() => handleInputChange("selectedRole", role.id)}
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
-                      className={`p-4 rounded-xl border-2 transition-all duration-300 ${
+                      className={`flex-1 min-w-[90px] p-4 rounded-xl border-2 transition-all duration-300 ${
                         formData.selectedRole === role.id
                           ? "border-brand-500 bg-brand-50/50 dark:bg-brand-900/20 shadow-medical dark:shadow-medical-dark"
                           : "border-light-border dark:border-dark-border bg-surface-light/30 dark:bg-surface-dark/30 hover:border-brand-300 dark:hover:border-brand-600"
                       }`}
                     >
-                      <div
-                        className={`w-10 h-10 bg-gradient-to-r ${role.color} rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg`}
-                      >
+                      <div className={`w-10 h-10 bg-gradient-to-r ${role.color} rounded-xl flex items-center justify-center mx-auto mb-3 shadow-lg`}>
                         <Icon className="w-5 h-5 text-white" />
                       </div>
                       <span className="text-sm font-medium text-light-text-primary dark:text-dark-text-primary block mb-1">

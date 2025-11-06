@@ -244,7 +244,7 @@ const SignupPage: React.FC<SignupPageProps> = ({
         <div className="text-center mb-8">
          
           <h1 className="text-3xl font-bold bg-gradient-to-r from-brand-600 to-accent-blue-light dark:from-brand-400 dark:to-accent-blue-dark bg-clip-text text-transparent mb-2">
-            Join MedQuery Agent
+            Join our MedQuery Agent
           </h1>
           <p className="text-light-text-secondary dark:text-dark-text-secondary">
             Create your professional medical account

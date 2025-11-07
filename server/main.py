@@ -5,11 +5,16 @@ from fastapi.exceptions import RequestValidationError
 from pydantic import ValidationError
 from database import engine, Base
 from router.auth import router as auth_router
-from .schemas import Question
-from .qa_chain import build_chain
+from schemas import Question
+
 
 import uvicorn
 import logging
+import sys
+import os
+
+# Add the parent directory to the Python path
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -28,7 +33,6 @@ app = FastAPI(
 )
 
 # Configure CORS
-import os
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
 
 app.add_middleware(
@@ -98,20 +102,13 @@ async def health_check():
         "authentication": "active"
     }
 
-qa_chain = build_chain()
 
-@app.post("/ask")
-async def ask_question(q: Question):
-    result = qa_chain.run(q.query)
-    return {"answer": result}
 
-# Include routers
+
 app.include_router(auth_router)
 
 
 if __name__ == "__main__":
-    import uvicorn
-    # Get port from environment variable (for Render deployment) or default to 8080
     port = int(os.getenv("PORT", 8080))
     
     uvicorn.run(

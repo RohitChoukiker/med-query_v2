@@ -98,3 +98,7 @@ class SignupResponse(BaseModel):
 class ErrorResponse(BaseModel):
     detail: str
     error_type: Optional[str] = None
+
+# Question Schema
+class Question(BaseModel):
+    query: str = Field(..., description="The question to be processed by the AI model")

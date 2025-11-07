@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Sun, Moon, User, LogOut, Bell, Search, Stethoscope } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -15,16 +15,36 @@ const Navbar: React.FC<NavbarProps> = ({ showThemeToggle = true }) => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const profileButtonRef = useRef<HTMLDivElement>(null);
 
+  // State to control navbar visibility
+  const [isNavbarVisible, setIsNavbarVisible] = useState(false);
+
+  useEffect(() => {
+    const handleMouseMove = (event: MouseEvent) => {
+      if (event.clientY <= 50) {
+        setIsNavbarVisible(true);
+      } else {
+        setIsNavbarVisible(false);
+      }
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+    };
+  }, []);
+
   return (
     <motion.nav
-  initial={{ y: -100 }}
-  animate={{ y: 0 }}
-  className="fixed w-full top-0 z-50 backdrop-blur-xl 
-             bg-surface-light/80 dark:bg-black/60 
-             border-b border-light-border/50 dark:border-dark-border/50 
-             shadow-professional dark:shadow-professional-dark 
-             transition-colors duration-300"
->
+      initial={{ y: -100 }}
+      animate={{ y: isNavbarVisible ? 0 : -100 }}
+      transition={{ duration: 0.3 }}
+      className="fixed w-full top-0 z-50 backdrop-blur-xl 
+                 bg-surface-light/80 dark:bg-black/60 
+                 border-b border-light-border/50 dark:border-dark-border/50 
+                 shadow-professional dark:shadow-professional-dark 
+                 transition-colors duration-300"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Medical Logo */}
@@ -41,20 +61,6 @@ const Navbar: React.FC<NavbarProps> = ({ showThemeToggle = true }) => {
               </span>
             )}
           </div>
-
-          {/* Medical Search Bar - Only show when authenticated */}
-          {user && (
-            <div className="hidden md:flex flex-1 max-w-md mx-8">
-              <div className="relative w-full">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-light-text-muted dark:text-dark-text-muted w-4 h-4" />
-                <input
-                  type="text"
-                  placeholder="Search medical queries, patient records, research..."
-                  className="w-full pl-10 pr-4 py-2 bg-surface-light/50 dark:bg-surface-dark/50 border border-light-border/50 dark:border-dark-border/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-500/50 focus:border-brand-500/50 transition-all text-light-text-primary dark:text-dark-text-primary placeholder-light-text-muted dark:placeholder-dark-text-muted"
-                />
-              </div>
-            </div>
-          )}
 
           {/* Right Side Controls */}
           <div className="flex items-center space-x-4">
@@ -77,8 +83,6 @@ const Navbar: React.FC<NavbarProps> = ({ showThemeToggle = true }) => {
             {/* Medical User Menu - Only show when authenticated */}
             {user && (
               <>
-               
-
                 {/* Medical User Profile */}
                 <div className="relative flex items-center space-x-3">
                   <div 

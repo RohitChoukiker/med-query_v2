@@ -26,7 +26,7 @@ const DoctorDashboard: React.FC = () => {
     { label: 'Accuracy Rating', value: '0/5', icon: Star, change: '0%', isLoading: true, trend: 'neutral' },
   ]);
   
-  const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
+  // const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   // Simulate API call to fetch stats
@@ -165,6 +165,13 @@ const DoctorDashboard: React.FC = () => {
     fetchRecentQueries();
   }, []);
 
+  const getGreeting = () => {
+    const currentHour = new Date().getHours();
+    if (currentHour < 12) return 'Good morning';
+    if (currentHour < 18) return 'Good afternoon';
+    return 'Good evening';
+  };
+
   return (
     <div className="p-6 space-y-6">
       {/* Welcome Header */}
@@ -175,7 +182,7 @@ const DoctorDashboard: React.FC = () => {
       >
         <div className="flex justify-between items-start mb-2">
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Good morning, {user?.full_name || user?.name}!
+            {getGreeting()}, {user?.full_name || user?.name}!
           </h1>
           <button
             onClick={handleRefresh}
@@ -191,87 +198,13 @@ const DoctorDashboard: React.FC = () => {
         <p className="text-gray-600 dark:text-gray-400 mb-2">
           Ready to assist your patients with AI-powered medical insights today.
         </p>
-        <p className="text-xs text-gray-500 dark:text-gray-500">
+        {/* <p className="text-xs text-gray-500 dark:text-gray-500">
           Last updated: {lastUpdated.toLocaleTimeString()}
-        </p>
+        </p> */}
       </motion.div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat, index) => {
-          const Icon = stat.icon;
-          
-          // Determine trend colors
-          const getTrendColor = (trend: string, change: string) => {
-            if (change === '0%') return 'text-gray-500 bg-gray-100 dark:bg-gray-800/30';
-            
-            switch (trend) {
-              case 'up':
-                return 'text-green-600 bg-green-100 dark:bg-green-900/30';
-              case 'down':
-                return 'text-red-600 bg-red-100 dark:bg-red-900/30';
-              default:
-                return 'text-gray-500 bg-gray-100 dark:bg-gray-800/30';
-            }
-          };
-
-          const getTrendIcon = (trend: string) => {
-            switch (trend) {
-              case 'up':
-                return '↗';
-              case 'down':
-                return '↘';
-              default:
-                return '→';
-            }
-          };
-          
-          return (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-xl rounded-xl p-6 border border-gray-200/50 dark:border-gray-700/50 shadow-lg relative overflow-hidden"
-            >
-              {/* Loading overlay */}
-              {stat.isLoading && (
-                <div className="absolute inset-0 bg-white/80 dark:bg-gray-800/80 flex items-center justify-center z-10">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-teal-600"></div>
-                </div>
-              )}
-              
-              <div className="flex items-center justify-between mb-4">
-                <div className="w-12 h-12 bg-gradient-to-br from-teal-500 to-blue-600 rounded-xl flex items-center justify-center">
-                  <Icon className="w-6 h-6 text-white" />
-                </div>
-                <span className={`text-xs font-medium px-2 py-1 rounded-full flex items-center space-x-1 ${getTrendColor(stat.trend, stat.change)}`}>
-                  <span>{getTrendIcon(stat.trend)}</span>
-                  <span>{stat.change}</span>
-                </span>
-              </div>
-              
-              <h3 className={`text-2xl font-bold mb-1 transition-all ${stat.isLoading ? 'text-gray-400' : 'text-gray-900 dark:text-white'}`}>
-                {stat.isLoading ? '...' : stat.value}
-              </h3>
-              
-              <p className="text-sm text-gray-600 dark:text-gray-400">
-                {stat.label}
-              </p>
-              
-              {/* Pulse effect for real-time updates */}
-              {!stat.isLoading && (
-                <motion.div
-                  className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-teal-500 to-blue-600"
-                  initial={{ width: 0 }}
-                  animate={{ width: '100%' }}
-                  transition={{ duration: 0.8, delay: index * 0.1 }}
-                />
-              )}
-            </motion.div>
-          );
-        })}
-      </div>
+     
 
       {/* Quick Actions */}
       <motion.div

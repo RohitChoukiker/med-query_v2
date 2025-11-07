@@ -32,7 +32,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
   const getMenuItems = () => {
     const commonItems = [
       { id: 'dashboard', label: 'Medical Dashboard', icon: Home, description: 'Overview & Analytics' },
-      { id: 'chat', label: 'AI Medical Assistant', icon: MessageSquare, description: 'Ask Medical Questions' },
+      { id: 'chat', label: 'AI Assistant', icon: MessageSquare, description: 'Ask Medical Questions' },
     ];
 
     switch (user?.role) {
@@ -83,7 +83,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
   const getRoleInfo = () => {
     switch (user?.role) {
       case 'doctor':
-        return { icon: Stethoscope, label: 'Clinical Dashboard', color: 'from-brand-500 to-accent-blue-light dark:to-accent-blue-dark' };
+        return { icon: Stethoscope, label: 'Dashboard', color: 'from-brand-500 to-accent-blue-light dark:to-accent-blue-dark' };
       case 'researcher':
         return { icon: Brain, label: 'Research Portal', color: 'from-accent-purple-light to-pink-500 dark:from-accent-purple-dark dark:to-pink-400' };
       case 'patient':

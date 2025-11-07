@@ -15,6 +15,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToSignup }) => {
   const [selectedRole, setSelectedRole] = useState<UserRole>('doctor');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -122,6 +123,10 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToSignup }) => {
     setEmail('airohit@protonmail.com');
     setPassword('Rohit@123');
     setSelectedRole('admin');
+  };
+
+  const togglePopup = () => {
+    setIsPopupOpen(!isPopupOpen);
   };
 
   return (
@@ -280,66 +285,79 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToSignup }) => {
         </motion.div>
       </motion.div>
 
-      {/* Popups Container */}
+      {/* Popups Box Container */}
       <div 
-        className="absolute top-4 right-4 grid grid-cols-2 gap-4 bg-transparent"
-        style={{ width: 'auto' }}
+        className="absolute top-0 right-0 bg-white dark:bg-dark-bg shadow-lg rounded-lg p-1 border border-light-border/50 dark:border-dark-border/50 hover:shadow-xl hover:border-brand-500 animate-pulse transition-all duration-500 ease-in-out cursor-pointer"
+        style={{ width: '200px' }}
+        onClick={togglePopup}
       >
-        {/* Popup for Doctor Credentials */}
-        <div 
-          className="bg-white dark:bg-dark-bg shadow-lg rounded-lg p-4 border border-light-border/50 dark:border-dark-border/50 w-64 cursor-pointer"
-          onClick={fillDoctorCredentials}
+        <h3 className="text-sm  font-bold text-light-text-primary dark:text-dark-text-primary mb-2 text-center whitespace-nowrap">
+          Click for Login Credentials
+        </h3>
+        <motion.div
+          initial={{ height: 0, opacity: 0 }}
+          animate={isPopupOpen ? { height: 'auto', opacity: 1 } : { height: 0, opacity: 0 }}
+          transition={{ duration: 0.5, ease: 'easeInOut' }}
+          className="overflow-hidden"
         >
-          <h3 className="text-lg font-bold text-light-text-primary dark:text-dark-text-primary mb-2">Doctor Credentials</h3>
-          <p className="text-sm text-light-text-secondary dark:text-dark-text-secondary mb-1">
-            <strong>Email:</strong> doctor@gmail.com
-          </p>
-          <p className="text-sm text-light-text-secondary dark:text-dark-text-secondary">
-            <strong>Password:</strong> Doctor@123
-          </p>
-        </div>
+          <div className="grid grid-cols-1 gap-2">
+            {/* Popup for Doctor Credentials */}
+            <div 
+              className="bg-white dark:bg-dark-bg shadow-md rounded-md p-2 border border-light-border/50 dark:border-dark-border/50 cursor-pointer hover:border-gray-400 hover:shadow-lg transition-all duration-500 ease-in-out"
+              onClick={fillDoctorCredentials}
+            >
+              <h4 className="text-xs font-semibold text-light-text-primary dark:text-dark-text-primary mb-1">Doctor</h4>
+              <p className="text-xs text-light-text-secondary dark:text-dark-text-secondary mb-1">
+                <strong>Email:</strong> doctor@gmail.com
+              </p>
+              <p className="text-xs text-light-text-secondary dark:text-dark-text-secondary">
+                <strong>Password:</strong> Doctor@123
+              </p>
+            </div>
 
-        {/* Popup for Researcher Credentials */}
-        <div 
-          className="bg-white dark:bg-dark-bg shadow-lg rounded-lg p-4 border border-light-border/50 dark:border-dark-border/50 w-64 cursor-pointer"
-          onClick={fillResearcherCredentials}
-        >
-          <h3 className="text-lg font-bold text-light-text-primary dark:text-dark-text-primary mb-2">Researcher Credentials</h3>
-          <p className="text-sm text-light-text-secondary dark:text-dark-text-secondary mb-1">
-            <strong>Email:</strong> researcher@gmail.com
-          </p>
-          <p className="text-sm text-light-text-secondary dark:text-dark-text-secondary">
-            <strong>Password:</strong> Researcher@123
-          </p>
-        </div>
+            {/* Popup for Researcher Credentials */}
+            <div 
+              className="bg-white dark:bg-dark-bg shadow-md rounded-md p-2 border border-light-border/50 dark:border-dark-border/50 cursor-pointer hover:border-gray-400 hover:shadow-lg transition-all duration-500 ease-in-out"
+              onClick={fillResearcherCredentials}
+            >
+              <h4 className="text-xs font-semibold text-light-text-primary dark:text-dark-text-primary mb-1">Researcher</h4>
+              <p className="text-xs text-light-text-secondary dark:text-dark-text-secondary mb-1">
+                <strong>Email:</strong> researcher@gmail.com
+              </p>
+              <p className="text-xs text-light-text-secondary dark:text-dark-text-secondary">
+                <strong>Password:</strong> Researcher@123
+              </p>
+            </div>
 
-        {/* Popup for Patient Credentials */}
-        <div 
-          className="bg-white dark:bg-dark-bg shadow-lg rounded-lg p-4 border border-light-border/50 dark:border-dark-border/50 w-64 cursor-pointer"
-          onClick={fillPatientCredentials}
-        >
-          <h3 className="text-lg font-bold text-light-text-primary dark:text-dark-text-primary mb-2">Patient Credentials</h3>
-          <p className="text-sm text-light-text-secondary dark:text-dark-text-secondary mb-1">
-            <strong>Email:</strong> patient@gmail.com
-          </p>
-          <p className="text-sm text-light-text-secondary dark:text-dark-text-secondary">
-            <strong>Password:</strong> Patient@123
-          </p>
-        </div>
+            {/* Popup for Patient Credentials */}
+            <div 
+              className="bg-white dark:bg-dark-bg shadow-md rounded-md p-2 border border-light-border/50 dark:border-dark-border/50 cursor-pointer hover:border-gray-400 hover:shadow-lg transition-all duration-500 ease-in-out"
+              onClick={fillPatientCredentials}
+            >
+              <h4 className="text-xs font-semibold text-light-text-primary dark:text-dark-text-primary mb-1">Patient</h4>
+              <p className="text-xs text-light-text-secondary dark:text-dark-text-secondary mb-1">
+                <strong>Email:</strong> patient@gmail.com
+              </p>
+              <p className="text-xs text-light-text-secondary dark:text-dark-text-secondary">
+                <strong>Password:</strong> Patient@123
+              </p>
+            </div>
 
-        {/* Popup for Admin Credentials */}
-        <div 
-          className="bg-white dark:bg-dark-bg shadow-lg rounded-lg p-4 border border-light-border/50 dark:border-dark-border/50 w-64 cursor-pointer"
-          onClick={fillAdminCredentials}
-        >
-          <h3 className="text-lg font-bold text-light-text-primary dark:text-dark-text-primary mb-2">Admin Credentials</h3>
-          <p className="text-sm text-light-text-secondary dark:text-dark-text-secondary mb-1">
-            <strong>Email:</strong> airohit@protonmail.com
-          </p>
-          <p className="text-sm text-light-text-secondary dark:text-dark-text-secondary">
-            <strong>Password:</strong> Rohit@123
-          </p>
-        </div>
+            {/* Popup for Admin Credentials */}
+            <div 
+              className="bg-white dark:bg-dark-bg shadow-md rounded-md p-2 border border-light-border/50 dark:border-dark-border/50 cursor-pointer hover:border-gray-400 hover:shadow-lg transition-all duration-500 ease-in-out"
+              onClick={fillAdminCredentials}
+            >
+              <h4 className="text-xs font-semibold text-light-text-primary dark:text-dark-text-primary mb-1">Admin</h4>
+              <p className="text-xs text-light-text-secondary dark:text-dark-text-secondary mb-1">
+                <strong>Email:</strong> airohit@protonmail.com
+              </p>
+              <p className="text-xs text-light-text-secondary dark:text-dark-text-secondary">
+                <strong>Password:</strong> Rohit@123
+              </p>
+            </div>
+          </div>
+        </motion.div>
       </div>
     </div>
   );

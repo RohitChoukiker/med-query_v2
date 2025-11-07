@@ -6,7 +6,7 @@ MedQuery is an intelligent medical question-answering system that uses **LangCha
 
   Live link : https://med-query1.vercel.app
 
-Features:
+Features
 
  💬 Natural Language Q&A over medical PDFs and PubMed data
  🧠 LangChain RAG pipeline with ChromaDB as vector store

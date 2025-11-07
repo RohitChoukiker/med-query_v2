@@ -1,4 +1,4 @@
- 🧠 MedQuery – AI-Powered Medical Q&A System (In Progress)
+MedQuery – AI-Powered Medical Q&A System (In Progress)
 
 MedQuery is an intelligent medical question-answering system that uses **LangChain**, **LLMs**, and **RAG (Retrieval-Augmented Generation)** to provide accurate responses based on medical documents and research data.
 

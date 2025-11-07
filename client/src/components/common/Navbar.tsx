@@ -4,6 +4,7 @@ import { Sun, Moon, User, LogOut, Bell, Search, Stethoscope } from 'lucide-react
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
 import UserProfilePopup from './UserProfilePopup';
+import { useLocation } from 'react-router-dom';
 
 interface NavbarProps {
   showThemeToggle?: boolean;
@@ -12,6 +13,7 @@ interface NavbarProps {
 const Navbar: React.FC<NavbarProps> = ({ showThemeToggle = true }) => {
   const { theme, toggleTheme } = useTheme();
   const { user, logout } = useAuth();
+  const location = useLocation();
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const profileButtonRef = useRef<HTMLDivElement>(null);
 
@@ -19,6 +21,11 @@ const Navbar: React.FC<NavbarProps> = ({ showThemeToggle = true }) => {
   const [isNavbarVisible, setIsNavbarVisible] = useState(false);
 
   useEffect(() => {
+    if (location.pathname === '/') {
+      setIsNavbarVisible(true); // Always show navbar on homepage
+      return;
+    }
+
     const handleMouseMove = (event: MouseEvent) => {
       if (event.clientY <= 50) {
         setIsNavbarVisible(true);
@@ -32,7 +39,7 @@ const Navbar: React.FC<NavbarProps> = ({ showThemeToggle = true }) => {
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
     };
-  }, []);
+  }, [location.pathname]);
 
   return (
     <motion.nav

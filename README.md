@@ -29,7 +29,7 @@ Features
 
 Setup Instructions:
 
-1. git clone https://github.com/RohitChoukiker/medQuery.git
+1. git clone https://github.com/RohitChoukiker/med-query_v2.git
 
 2. For Backend
    cd server

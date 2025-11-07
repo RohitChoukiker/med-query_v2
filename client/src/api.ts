@@ -1,5 +1,5 @@
- //export const BASE_URL = 'http://localhost:8000'; 
- export const BASE_URL = 'https://medquery-1.onrender.com'; // Production
+ export const BASE_URL = 'http://localhost:8000'; 
+ //export const BASE_URL = 'https://medquery-1.onrender.com'; // Production
 
 // Type definitions for API responses
 export interface LoginResponse {

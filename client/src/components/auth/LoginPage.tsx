@@ -100,8 +100,32 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToSignup }) => {
     }
   };
 
+  const fillDoctorCredentials = () => {
+    setEmail('doctor@gmail.com');
+    setPassword('Doctor@123');
+    setSelectedRole('doctor');
+  };
+
+  const fillResearcherCredentials = () => {
+    setEmail('researcher@gmail.com');
+    setPassword('Researcher@123');
+    setSelectedRole('researcher');
+  };
+
+  const fillPatientCredentials = () => {
+    setEmail('patient@gmail.com');
+    setPassword('Patient@123');
+    setSelectedRole('patient');
+  };
+
+  const fillAdminCredentials = () => {
+    setEmail('airohit@protonmail.com');
+    setPassword('Rohit@123');
+    setSelectedRole('admin');
+  };
+
   return (
-    <div className="min-h-screen bg-white/10 rounded-t-2xl dark:bg-dark-bg transition-colors duration-300 flex items-center justify-center p-4 font-medical" style={{ margin: '65px' }}>
+    <div className="min-h-screen bg-white/10 rounded-t-2xl dark:bg-dark-bg transition-colors duration-300 flex items-center justify-center p-4 font-medical relative" style={{ margin: '65px' }}>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -253,10 +277,70 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToSignup }) => {
               </p>
             </div>
           </form>
-
-          
         </motion.div>
       </motion.div>
+
+      {/* Popups Container */}
+      <div 
+        className="absolute top-4 right-4 grid grid-cols-2 gap-4 bg-transparent"
+        style={{ width: 'auto' }}
+      >
+        {/* Popup for Doctor Credentials */}
+        <div 
+          className="bg-white dark:bg-dark-bg shadow-lg rounded-lg p-4 border border-light-border/50 dark:border-dark-border/50 w-64 cursor-pointer"
+          onClick={fillDoctorCredentials}
+        >
+          <h3 className="text-lg font-bold text-light-text-primary dark:text-dark-text-primary mb-2">Doctor Credentials</h3>
+          <p className="text-sm text-light-text-secondary dark:text-dark-text-secondary mb-1">
+            <strong>Email:</strong> doctor@gmail.com
+          </p>
+          <p className="text-sm text-light-text-secondary dark:text-dark-text-secondary">
+            <strong>Password:</strong> Doctor@123
+          </p>
+        </div>
+
+        {/* Popup for Researcher Credentials */}
+        <div 
+          className="bg-white dark:bg-dark-bg shadow-lg rounded-lg p-4 border border-light-border/50 dark:border-dark-border/50 w-64 cursor-pointer"
+          onClick={fillResearcherCredentials}
+        >
+          <h3 className="text-lg font-bold text-light-text-primary dark:text-dark-text-primary mb-2">Researcher Credentials</h3>
+          <p className="text-sm text-light-text-secondary dark:text-dark-text-secondary mb-1">
+            <strong>Email:</strong> researcher@gmail.com
+          </p>
+          <p className="text-sm text-light-text-secondary dark:text-dark-text-secondary">
+            <strong>Password:</strong> Researcher@123
+          </p>
+        </div>
+
+        {/* Popup for Patient Credentials */}
+        <div 
+          className="bg-white dark:bg-dark-bg shadow-lg rounded-lg p-4 border border-light-border/50 dark:border-dark-border/50 w-64 cursor-pointer"
+          onClick={fillPatientCredentials}
+        >
+          <h3 className="text-lg font-bold text-light-text-primary dark:text-dark-text-primary mb-2">Patient Credentials</h3>
+          <p className="text-sm text-light-text-secondary dark:text-dark-text-secondary mb-1">
+            <strong>Email:</strong> patient@gmail.com
+          </p>
+          <p className="text-sm text-light-text-secondary dark:text-dark-text-secondary">
+            <strong>Password:</strong> Patient@123
+          </p>
+        </div>
+
+        {/* Popup for Admin Credentials */}
+        <div 
+          className="bg-white dark:bg-dark-bg shadow-lg rounded-lg p-4 border border-light-border/50 dark:border-dark-border/50 w-64 cursor-pointer"
+          onClick={fillAdminCredentials}
+        >
+          <h3 className="text-lg font-bold text-light-text-primary dark:text-dark-text-primary mb-2">Admin Credentials</h3>
+          <p className="text-sm text-light-text-secondary dark:text-dark-text-secondary mb-1">
+            <strong>Email:</strong> airohit@protonmail.com
+          </p>
+          <p className="text-sm text-light-text-secondary dark:text-dark-text-secondary">
+            <strong>Password:</strong> Rohit@123
+          </p>
+        </div>
+      </div>
     </div>
   );
 };

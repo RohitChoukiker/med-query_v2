@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Upload, MessageSquare, Clock, Star, TrendingUp, FileText, RefreshCw } from 'lucide-react';
+import { Upload, MessageSquare, Clock, Star, FileText, RefreshCw, CheckCircle2, Loader2, AlertCircle } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { documentsAPI, DocumentListItem, aiAPI, QueryAnswer } from '../../api';
 
 // Types for stats
 interface StatData {
@@ -28,6 +29,9 @@ const DoctorDashboard: React.FC = () => {
   
   // const [lastUpdated, setLastUpdated] = useState<Date>(new Date());
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [documents, setDocuments] = useState<DocumentListItem[]>([]);
+  const [documentsLoading, setDocumentsLoading] = useState(true);
+  const [documentsError, setDocumentsError] = useState<string | null>(null);
 
   // Simulate API call to fetch stats
   const fetchStats = async () => {
@@ -88,13 +92,28 @@ const DoctorDashboard: React.FC = () => {
     ];
     
     setStats(newStats);
-    setLastUpdated(new Date());
     setIsRefreshing(false);
+  };
+
+  const loadDocuments = async () => {
+    setDocumentsLoading(true);
+    setDocumentsError(null);
+
+    const response = await documentsAPI.list();
+
+    if (response.data && response.status === 200) {
+      setDocuments(response.data);
+    } else {
+      setDocumentsError(response.error || 'Unable to fetch uploaded documents.');
+    }
+
+    setDocumentsLoading(false);
   };
 
   // Auto-refresh stats every 5 minutes
   useEffect(() => {
     fetchStats(); // Initial fetch
+    loadDocuments();
     
     const interval = setInterval(() => {
       fetchStats();
@@ -119,45 +138,62 @@ const DoctorDashboard: React.FC = () => {
     fetchStats();
   };
 
-  // Dynamic recent queries
-  const [recentQueries, setRecentQueries] = useState([
-    { id: 1, query: 'Loading recent queries...', time: 'Just now', status: 'loading' },
-  ]);
+  // Recent queries state
+  const [recentQueries, setRecentQueries] = useState<Array<{
+    id: number;
+    query: string;
+    time: string;
+    status: string;
+  }>>([]);
+  const [queriesLoading, setQueriesLoading] = useState(true);
+  const [queriesError, setQueriesError] = useState<string | null>(null);
 
-  // Simulate fetching recent queries
+  // Helper function to format time ago
+  const formatTimeAgo = (dateString: string): string => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
+    
+    if (diffInSeconds < 60) {
+      return 'Just now';
+    } else if (diffInSeconds < 3600) {
+      const minutes = Math.floor(diffInSeconds / 60);
+      return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+    } else if (diffInSeconds < 86400) {
+      const hours = Math.floor(diffInSeconds / 3600);
+      return `${hours} hour${hours > 1 ? 's' : ''} ago`;
+    } else {
+      const days = Math.floor(diffInSeconds / 86400);
+      return `${days} day${days > 1 ? 's' : ''} ago`;
+    }
+  };
+
+  // Fetch recent queries from API
   const fetchRecentQueries = async () => {
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    setQueriesLoading(true);
+    setQueriesError(null);
     
-    const sampleQueries = [
-      'Chest X-ray interpretation for 45-year-old patient',
-      'Blood work analysis - elevated white cell count',
-      'MRI scan findings consultation',
-      'Medication interaction check',
-      'ECG rhythm analysis for cardiac patient',
-      'CT scan interpretation - abdominal pain',
-      'Dermatology consultation - skin lesion',
-      'Pediatric growth chart evaluation',
-      'Orthopedic assessment - joint pain',
-      'Neurological symptoms evaluation'
-    ];
-    
-    const statuses = ['answered', 'bookmarked', 'answered', 'answered'];
-    const times = [
-      `${Math.floor(Math.random() * 30) + 5} minutes ago`,
-      `${Math.floor(Math.random() * 45) + 15} minutes ago`,
-      `${Math.floor(Math.random() * 3) + 1} hour ago`,
-      `${Math.floor(Math.random() * 5) + 2} hours ago`
-    ];
-    
-    const dynamicQueries = Array.from({ length: 4 }, (_, index) => ({
-      id: index + 1,
-      query: sampleQueries[Math.floor(Math.random() * sampleQueries.length)],
-      time: times[index],
-      status: statuses[index]
-    }));
-    
-    setRecentQueries(dynamicQueries);
+    try {
+      const response = await aiAPI.history(10); // Fetch last 10 queries
+      
+      if (response.data && response.status === 200) {
+        const queries = response.data.queries.map((query: QueryAnswer, index: number) => ({
+          id: index + 1,
+          query: query.question,
+          time: formatTimeAgo(query.created_at),
+          status: query.answer ? 'answered' : 'pending'
+        }));
+        setRecentQueries(queries);
+      } else {
+        setQueriesError(response.error || 'Unable to fetch query history.');
+        setRecentQueries([]);
+      }
+    } catch (error) {
+      setQueriesError('Failed to load query history. Please try again.');
+      setRecentQueries([]);
+    } finally {
+      setQueriesLoading(false);
+    }
   };
 
   // Fetch recent queries when component mounts
@@ -206,6 +242,95 @@ const DoctorDashboard: React.FC = () => {
       {/* Stats Grid */}
      
 
+      {/* Uploaded Documents */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+        className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-xl rounded-xl p-6 border border-gray-200/50 dark:border-gray-700/50 shadow-lg"
+      >
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h2 className="text-lg font-semibold text-gray-900 dark:text-white">Patient Documents</h2>
+            <p className="text-sm text-gray-500 dark:text-gray-400">Files uploaded via MedQuery</p>
+          </div>
+          <button
+            onClick={loadDocuments}
+            disabled={documentsLoading}
+            className="flex items-center space-x-2 px-3 py-2 bg-gray-100/80 dark:bg-gray-700/70 rounded-lg hover:bg-gray-200/80 dark:hover:bg-gray-600/70 transition-all disabled:opacity-50"
+          >
+            <RefreshCw className={`w-4 h-4 text-gray-700 dark:text-gray-200 ${documentsLoading ? 'animate-spin' : ''}`} />
+            <span className="text-sm font-medium text-gray-700 dark:text-gray-200">Refresh</span>
+          </button>
+        </div>
+
+        {documentsLoading ? (
+          <div className="flex items-center justify-center py-10 text-gray-500 dark:text-gray-400 space-x-2">
+            <Loader2 className="w-5 h-5 animate-spin" />
+            <span>Fetching your files…</span>
+          </div>
+        ) : documentsError ? (
+          <div className="flex items-center space-x-3 p-4 border border-red-200 dark:border-red-800 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-200">
+            <AlertCircle className="w-5 h-5" />
+            <div>
+              <p className="font-semibold text-sm">Unable to load documents</p>
+              <p className="text-xs">{documentsError}</p>
+            </div>
+          </div>
+        ) : documents.length === 0 ? (
+          <div className="text-center py-10 text-gray-500 dark:text-gray-400">
+            <p className="font-medium">No documents uploaded yet.</p>
+            <p className="text-sm mt-2">Upload your first patient report to see it here.</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {documents.map((doc) => (
+              <div
+                key={doc.id}
+                className="p-4 bg-gray-50/70 dark:bg-gray-700/50 rounded-xl border border-gray-200/40 dark:border-gray-600/40"
+              >
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="font-semibold text-gray-900 dark:text-white">{doc.filename}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                      Uploaded on {new Date(doc.created_at).toLocaleString()}
+                    </p>
+                  </div>
+                  <span
+                    className={`inline-flex items-center space-x-1 px-3 py-1 rounded-full text-xs font-medium ${
+                      doc.processed
+                        ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
+                        : 'bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-400'
+                    }`}
+                  >
+                    {doc.processed ? (
+                      <>
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        <span>Processed</span>
+                      </>
+                    ) : (
+                      <>
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        <span>Processing</span>
+                      </>
+                    )}
+                  </span>
+                </div>
+                {doc.preview ? (
+                  <p className="text-sm text-gray-600 dark:text-gray-300 mt-3 line-clamp-2">
+                    {doc.preview}
+                  </p>
+                ) : (
+                  <p className="text-sm text-gray-400 dark:text-gray-500 mt-3 italic">
+                    No preview available for this file.
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </motion.div>
+
       {/* Quick Actions */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -216,7 +341,7 @@ const DoctorDashboard: React.FC = () => {
         <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
           Quick Actions
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <button 
             onClick={() => handleQuickAction('upload')}
             className="flex items-center space-x-3 p-4 bg-gradient-to-r from-teal-500/10 to-blue-500/10 rounded-xl border border-teal-200/20 dark:border-teal-700/20 hover:from-teal-500/20 hover:to-blue-500/20 transition-all"
@@ -231,13 +356,7 @@ const DoctorDashboard: React.FC = () => {
             <MessageSquare className="w-5 h-5 text-purple-600 dark:text-purple-400" />
             <span className="font-medium text-gray-900 dark:text-white">Ask AI Assistant</span>
           </button>
-          <button 
-            onClick={() => handleQuickAction('history')}
-            className="flex items-center space-x-3 p-4 bg-gradient-to-r from-orange-500/10 to-red-500/10 rounded-xl border border-orange-200/20 dark:border-orange-700/20 hover:from-orange-500/20 hover:to-red-500/20 transition-all"
-          >
-            <FileText className="w-5 h-5 text-orange-600 dark:text-orange-400" />
-            <span className="font-medium text-gray-900 dark:text-white">View Query History</span>
-          </button>
+         
         </div>
       </motion.div>
 
@@ -248,42 +367,51 @@ const DoctorDashboard: React.FC = () => {
         transition={{ delay: 0.6 }}
         className="bg-white/50 dark:bg-gray-800/50 backdrop-blur-xl rounded-xl p-6 border border-gray-200/50 dark:border-gray-700/50 shadow-lg"
       >
-        <h2 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-          Recent Queries
-        </h2>
-        <div className="space-y-3">
-          {recentQueries.map((query, index) => (
-            <motion.div
-              key={query.id}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.1 }}
-              onClick={() => query.status !== 'loading' && handleQueryClick(query.id)}
-              className={`flex items-center justify-between p-4 bg-gray-50/50 dark:bg-gray-700/50 rounded-xl border border-gray-200/20 dark:border-gray-600/20 transition-all ${
-                query.status === 'loading' 
-                  ? 'opacity-70' 
-                  : 'hover:bg-gray-100/50 dark:hover:bg-gray-600/50 cursor-pointer hover:shadow-md'
-              }`}
-            >
-              <div className="flex-1">
-                <p className={`font-medium text-sm ${
-                  query.status === 'loading' 
-                    ? 'text-gray-500 dark:text-gray-400' 
-                    : 'text-gray-900 dark:text-white'
-                }`}>
-                  {query.query}
-                </p>
-                <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                  {query.time}
-                </p>
-              </div>
-              
-              {query.status === 'loading' ? (
-                <div className="flex items-center space-x-2">
-                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-400"></div>
-                  <span className="text-xs text-gray-500">Loading...</span>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+            Your Recent Questions
+          </h2>
+         
+        </div>
+        
+        {queriesLoading ? (
+          <div className="flex items-center justify-center py-10 text-gray-500 dark:text-gray-400 space-x-2">
+            <Loader2 className="w-5 h-5 animate-spin" />
+            <span>Loading query history…</span>
+          </div>
+        ) : queriesError ? (
+          <div className="flex items-center space-x-3 p-4 border border-red-200 dark:border-red-800 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-700 dark:text-red-200">
+            <AlertCircle className="w-5 h-5" />
+            <div>
+              <p className="font-semibold text-sm">Unable to load query history</p>
+              <p className="text-xs">{queriesError}</p>
+            </div>
+          </div>
+        ) : recentQueries.length === 0 ? (
+          <div className="text-center py-10 text-gray-500 dark:text-gray-400">
+            <p className="font-medium">No queries yet.</p>
+            <p className="text-sm mt-2">Start asking questions to see your query history here.</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {recentQueries.map((query, index) => (
+              <motion.div
+                key={query.id}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: index * 0.1 }}
+                onClick={() => handleQueryClick(query.id)}
+                className="flex items-center justify-between p-4 bg-gray-50/50 dark:bg-gray-700/50 rounded-xl border border-gray-200/20 dark:border-gray-600/20 transition-all hover:bg-gray-100/50 dark:hover:bg-gray-600/50 cursor-pointer hover:shadow-md"
+              >
+                <div className="flex-1">
+                  <p className="font-medium text-sm text-gray-900 dark:text-white">
+                    {query.query}
+                  </p>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    {query.time}
+                  </p>
                 </div>
-              ) : (
+                
                 <span className={`px-3 py-1 rounded-full text-xs font-medium ${
                   query.status === 'answered'
                     ? 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400'
@@ -291,10 +419,10 @@ const DoctorDashboard: React.FC = () => {
                 }`}>
                   {query.status}
                 </span>
-              )}
-            </motion.div>
-          ))}
-        </div>
+              </motion.div>
+            ))}
+          </div>
+        )}
       </motion.div>
     </div>
   );

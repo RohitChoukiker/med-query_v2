@@ -150,3 +150,20 @@ class QueryAnswerResponse(BaseModel):
 
 class QueryHistoryResponse(BaseModel):
     queries: List[QueryAnswerResponse]
+
+
+# PubMed Schemas
+class PubMedPaper(BaseModel):
+    pmid: str
+    title: str
+    abstract: str
+    journal: str
+    year: str
+    doi: str
+    authors: List[str]
+
+
+class PubMedSearchResponse(BaseModel):
+    query: str
+    papers: List[PubMedPaper]
+    count: int

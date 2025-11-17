@@ -1,5 +1,6 @@
 from datetime import timedelta
-from fastapi import APIRouter, Depends, HTTPException, status
+import os
+from fastapi import APIRouter, Depends, HTTPException, status, Response
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
@@ -13,11 +14,16 @@ from repository.auth import (
     create_access_token, 
     get_password_hash, 
     get_current_user,
-    ACCESS_TOKEN_EXPIRE_MINUTES
+    ACCESS_TOKEN_EXPIRE_MINUTES,
+    AUTH_COOKIE_NAME,
 )
 
 # Configure logger
 logger = logging.getLogger(__name__)
+
+AUTH_COOKIE_SECURE = os.getenv("AUTH_COOKIE_SECURE", "false").lower() == "true"
+AUTH_COOKIE_DOMAIN = os.getenv("AUTH_COOKIE_DOMAIN")
+AUTH_COOKIE_SAMESITE = os.getenv("AUTH_COOKIE_SAMESITE", "lax")
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
 
@@ -88,7 +94,11 @@ async def signup(user_data: UserCreate, db: Session = Depends(get_db)):
         )
 
 @router.post("/login", response_model=Token, responses={401: {"model": ErrorResponse}})
-async def login(user_credentials: UserLogin, db: Session = Depends(get_db)):
+async def login(
+    user_credentials: UserLogin,
+    response: Response,
+    db: Session = Depends(get_db)
+):
     """Authenticate user and return access token."""
     try:
         # Authenticate user
@@ -113,6 +123,18 @@ async def login(user_credentials: UserLogin, db: Session = Depends(get_db)):
         access_token = create_access_token(
             data={"sub": user.email, "role": user.role.value}, 
             expires_delta=access_token_expires
+        )
+        
+        cookie_max_age = int(access_token_expires.total_seconds())
+        response.set_cookie(
+            key=AUTH_COOKIE_NAME,
+            value=access_token,
+            httponly=True,
+            secure=AUTH_COOKIE_SECURE,
+            samesite=AUTH_COOKIE_SAMESITE,
+            max_age=cookie_max_age,
+            expires=cookie_max_age,
+            domain=AUTH_COOKIE_DOMAIN,
         )
         
         return Token(access_token=access_token, token_type="bearer")
@@ -145,9 +167,13 @@ async def get_current_user_profile(current_user: User = Depends(get_current_user
         )
 
 @router.post("/logout")
-async def logout():
+async def logout(response: Response):
     """Logout endpoint (client-side token removal)."""
-    return {"message": "Successfully logged out. Please remove the token from client storage."}
+    response.delete_cookie(
+        key=AUTH_COOKIE_NAME,
+        domain=AUTH_COOKIE_DOMAIN,
+    )
+    return {"message": "Successfully logged out. Token cleared from secure storage."}
 
 # Health check endpoint for authentication service
 @router.get("/health")

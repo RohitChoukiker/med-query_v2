@@ -1,4 +1,6 @@
- export const BASE_URL = 'http://localhost:8000'; 
+import { tokenStorage } from './utils/tokenStorage';
+
+export const BASE_URL = 'http://localhost:8000'; 
  //export const BASE_URL = 'https://medquery-1.onrender.com'; // Production
 
 // Type definitions for API responses
@@ -45,7 +47,16 @@ export const API_ENDPOINTS = {
     QUERY: `${BASE_URL}/ai/query`,
     HISTORY: `${BASE_URL}/ai/history`,
   },
- 
+  DOCUMENTS: {
+    UPLOAD: `${BASE_URL}/documents/upload`,
+    LIST: `${BASE_URL}/documents`,
+    SEARCH: `${BASE_URL}/documents/search`,
+    DOWNLOAD: (docId: string) => `${BASE_URL}/documents/download/${docId}`,
+  },
+  PUBMED: {
+    SEARCH: `${BASE_URL}/pubmed/search`,
+    PAPER: (pmid: string) => `${BASE_URL}/pubmed/paper/${pmid}`,
+  },
 };
 
 // Common API Response Types
@@ -56,37 +67,47 @@ export interface ApiResponse<T = any> {
   status: number;
 }
 
+export interface DocumentUploadResponse {
+  id: string;
+  filename: string;
+  processed: boolean;
+}
+
+export interface DocumentListItem {
+  id: string;
+  filename: string;
+  processed: boolean;
+  preview: string;
+  created_at: string;
+}
+
 // API Request Helper Class
 export class ApiClient {
   private baseURL: string;
-  private token: string | null = null;
 
   constructor(baseURL: string = BASE_URL) {
     this.baseURL = baseURL;
-    // Get token from localStorage if available
-    this.token = localStorage.getItem('access_token');
   }
 
   // Set authentication token
-  setToken(token: string) {
-    this.token = token;
-    localStorage.setItem('access_token', token);
+  setToken(token: string, options?: { persist?: boolean }) {
+    tokenStorage.setToken(token, options?.persist);
   }
 
   // Remove authentication token
   removeToken() {
-    this.token = null;
-    localStorage.removeItem('access_token');
+    tokenStorage.clear();
   }
 
   // Get default headers
-  private getHeaders(): HeadersInit {
-    const headers: HeadersInit = {
+  private getHeaders(): Record<string, string> {
+    const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     };
 
-    if (this.token) {
-      headers['Authorization'] = `Bearer ${this.token}`;
+    const token = tokenStorage.getToken();
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
     }
 
     return headers;
@@ -99,13 +120,21 @@ export class ApiClient {
   ): Promise<ApiResponse<T>> {
     try {
       const url = endpoint.startsWith('http') ? endpoint : `${this.baseURL}${endpoint}`;
-      
+
+      const extraHeaders = options.headers ? (options.headers as Record<string, string>) : {};
+      const mergedHeaders: Record<string, string> = {
+        ...this.getHeaders(),
+        ...extraHeaders,
+      };
+
+      if (options.body instanceof FormData && mergedHeaders['Content-Type']) {
+        delete mergedHeaders['Content-Type'];
+      }
+
       const response = await fetch(url, {
         ...options,
-        headers: {
-          ...this.getHeaders(),
-          ...options.headers,
-        },
+        headers: mergedHeaders,
+        credentials: options.credentials ?? 'include',
       });
 
       let data;
@@ -144,6 +173,13 @@ export class ApiClient {
     });
   }
 
+  async uploadFormData<T>(endpoint: string, formData: FormData): Promise<ApiResponse<T>> {
+    return this.request<T>(endpoint, {
+      method: 'POST',
+      body: formData,
+    });
+  }
+
   async put<T>(endpoint: string, data?: any): Promise<ApiResponse<T>> {
     return this.request<T>(endpoint, {
       method: 'PUT',
@@ -174,12 +210,12 @@ export const authAPI = {
   },
 
   // Login
-  login: async (credentials: any) => {
+  login: async (credentials: any, options?: { persistSession?: boolean }) => {
     const response = await apiClient.post<LoginResponse>(API_ENDPOINTS.AUTH.LOGIN, credentials);
     
     // If login successful, save token
     if (response.data?.access_token) {
-      apiClient.setToken(response.data.access_token);
+      apiClient.setToken(response.data.access_token, { persist: options?.persistSession });
     }
     
     return response;
@@ -208,12 +244,12 @@ export const authAPI = {
 
 // Utility function to check if user is authenticated
 export const isAuthenticated = (): boolean => {
-  return !!localStorage.getItem('access_token');
+  return tokenStorage.hasToken();
 };
 
 // Utility function to get stored token
 export const getStoredToken = (): string | null => {
-  return localStorage.getItem('access_token');
+  return tokenStorage.getToken();
 };
 
 // Ask AI Medical Assistant
@@ -229,6 +265,48 @@ export const getQueryHistory = async (limit: number = 5) => {
 export const aiAPI = {
   ask: askAI,
   history: getQueryHistory,
+};
+
+export const documentsAPI = {
+  upload: async (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    return apiClient.uploadFormData<DocumentUploadResponse>(API_ENDPOINTS.DOCUMENTS.UPLOAD, formData);
+  },
+  list: async () => {
+    return apiClient.get<DocumentListItem[]>(API_ENDPOINTS.DOCUMENTS.LIST);
+  },
+};
+
+// PubMed API Types
+export interface PubMedPaper {
+  pmid: string;
+  title: string;
+  abstract: string;
+  journal: string;
+  year: string;
+  doi: string;
+  authors: string[];
+}
+
+export interface PubMedSearchResponse {
+  query: string;
+  papers: PubMedPaper[];
+  count: number;
+}
+
+export const pubmedAPI = {
+  search: async (query: string, limit: number = 20) => {
+    const params = new URLSearchParams({
+      query: query,
+      limit: limit.toString(),
+    });
+    const url = `${API_ENDPOINTS.PUBMED.SEARCH}?${params.toString()}`;
+    return apiClient.get<PubMedSearchResponse>(url);
+  },
+  getPaper: async (pmid: string) => {
+    return apiClient.get<PubMedPaper>(API_ENDPOINTS.PUBMED.PAPER(pmid));
+  },
 };
 
 // Environment helper

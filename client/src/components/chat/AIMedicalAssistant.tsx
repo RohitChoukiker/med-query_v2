@@ -69,56 +69,47 @@ const AIMedicalAssistant: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col h-full max-w-xl mx-auto bg-white dark:bg-gray-900 rounded-xl shadow-lg p-4">
-      <div className="flex-1 overflow-y-auto mb-4 space-y-3">
-        {messages.map((msg) => (
-          <div
-            key={msg.id}
-            className={`p-3 rounded-lg ${
-              msg.isUser
-                ? 'bg-blue-100 dark:bg-blue-800 text-right ml-auto'
-                : msg.isError
-                ? 'bg-red-100 dark:bg-red-800 text-left mr-auto'
-                : 'bg-gray-100 dark:bg-gray-800 mr-auto'
-            }`}
-          >
-            <p className="text-sm whitespace-pre-wrap">{msg.text}</p>
+    <div className="flex flex-col h-full w-full mx-auto bg-white dark:bg-gray-900 rounded-xl shadow-lg p-4">
+      <div className="flex-1 overflow-y-auto mb-4 space-y-4">
+        {messages.map((msg) => {
+          const alignment = msg.isUser ? 'justify-end' : 'justify-start';
+          const bubbleStyles = msg.isError
+            ? 'bg-red-100 dark:bg-red-900/40 text-red-700 dark:text-red-200'
+            : msg.isUser
+            ? 'bg-gray-100 text-black shadow-lg text-right'
+            : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100 shadow';
 
-            {msg.sources && msg.sources.length > 0 && (
-              <div className="mt-2 border-t border-gray-200 dark:border-gray-700 pt-2">
-                <p className="text-xs text-gray-500 dark:text-gray-400 mb-1">Sources:</p>
-                <ul className="space-y-1">
-                  {msg.sources.map((source) => (
-                    <li key={source.chunk_id} className="text-xs text-gray-600 dark:text-gray-300">
-                      <span className="font-medium">{source.filename}</span>
-                      <span className="block text-gray-500 dark:text-gray-400">
-                        {source.snippet.slice(0, 120)}...
-                      </span>
-                    </li>
-                  ))}
-                </ul>
+          return (
+            <div key={msg.id} className={`flex ${alignment}`}>
+              <div className="max-w-[80%] space-y-2">
+                <div className={`p-3 rounded-2xl whitespace-pre-wrap text-sm ${bubbleStyles}`}>
+                  {msg.text}
+                </div>
+
+                
               </div>
-            )}
-          </div>
-        ))}
+            </div>
+          );
+        })}
         {loading && <div className="text-gray-400 text-sm">AI is analyzing your documents...</div>}
       </div>
       <div className="flex gap-2">
-        <input
-          className="flex-1 border rounded-lg px-3 py-2 dark:bg-gray-700 dark:text-white"
+        <textarea
+          className="flex-1 border rounded-lg px-3 py-2 dark:bg-gray-700 dark:text-white resize-none max-h-40 min-h-[48px] overflow-y-auto"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => {
-            if (e.key === 'Enter') {
+            if (e.key === 'Enter' && !e.shiftKey) {
               e.preventDefault();
               handleSend();
             }
           }}
           placeholder="Ask a medical question about your uploaded files..."
           disabled={loading}
+          rows={2}
         />
         <button
-          className="bg-blue-600 text-white px-4 py-2 rounded-lg disabled:opacity-50"
+          className="bg-[#0EA5E9] hover:bg-[#0EA5E9]/80 rounded-lg text-white px-4 py-2 disabled:opacity-50"
           onClick={handleSend}
           disabled={loading || !input.trim()}
         >

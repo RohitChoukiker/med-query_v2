@@ -584,7 +584,7 @@ const LandingPage: React.FC<LandingPageProps> = ({
       <p className="text-sm mt-4">
         Built by{" "}
         <a
-          href="https://www.rohitchoukiker.me/"
+          href="https://www.rohitsudo.com/"
           target="_blank"
           rel="noopener noreferrer"
           className="text-accent-blue-light hover:text-accent-blue-dark hover:underline transition-colors duration-200 font-semibold"

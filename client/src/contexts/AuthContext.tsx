@@ -23,9 +23,13 @@ interface SignupData {
   specialization?: string;
 }
 
+interface LoginOptions {
+  remember?: boolean;
+}
+
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string, role: UserRole) => Promise<boolean>;
+  login: (email: string, password: string, role: UserRole, options?: LoginOptions) => Promise<boolean>;
   signup: (data: SignupData) => Promise<boolean>;
   logout: () => Promise<void>;
   isAuthenticated: boolean;
@@ -54,44 +58,42 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Check if user is already logged in
   useEffect(() => {
     const checkAuth = async () => {
-      const token = localStorage.getItem('access_token');
-      if (token) {
-        try {
-          // Set token in API client
-          apiClient.setToken(token);
-          const response = await authAPI.getCurrentUser();
-          
-          if (response.data && response.status === 200) {
-            const userData = response.data;
-            setUser({
-              id: userData.id.toString(),
-              email: userData.email,
-              full_name: userData.full_name,
-              role: userData.role as UserRole,
-              license_number: userData.license_number,
-              institution: userData.institution,
-              specialization: userData.specialization
-            });
-          } else {
-            // Token is invalid or expired
-            localStorage.removeItem('access_token');
-            apiClient.removeToken();
-          }
-        } catch (error) {
-          console.error('Auth check failed:', error);
-          localStorage.removeItem('access_token');
+      try {
+        const response = await authAPI.getCurrentUser();
+        
+        if (response.data && response.status === 200) {
+          const userData = response.data;
+          setUser({
+            id: userData.id.toString(),
+            email: userData.email,
+            full_name: userData.full_name,
+            role: userData.role as UserRole,
+            license_number: userData.license_number,
+            institution: userData.institution,
+            specialization: userData.specialization
+          });
+        } else {
           apiClient.removeToken();
         }
+      } catch (error) {
+        console.error('Auth check failed:', error);
+        apiClient.removeToken();
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
     };
 
     checkAuth();
   }, []);
 
-  const login = async (email: string, password: string, role: UserRole): Promise<boolean> => {
+  const login = async (
+    email: string,
+    password: string,
+    role: UserRole,
+    options?: LoginOptions
+  ): Promise<boolean> => {
     try {
-      const response = await authAPI.login({ email, password, role });
+      const response = await authAPI.login({ email, password, role }, { persistSession: options?.remember });
 
       if (response.error) {
         console.error('Login failed:', response.error);
@@ -158,6 +160,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } finally {
       // Always clean up locally
       setUser(null);
+      apiClient.removeToken();
     }
   };
 

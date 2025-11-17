@@ -23,6 +23,7 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/ai", tags=["ai"])
 
+
 GEMINI_MODEL = "models/gemini-2.5-pro-preview-03-25"
 
 _gemini_model = None
@@ -80,6 +81,29 @@ def _build_prompt(question: str, sources: List[QuerySource]) -> str:
     )
 
 
+def _build_fallback_prompt(question: str) -> str:
+    instructions = (
+        "You are a clinical copilot that must provide careful, evidence-aware insights. "
+        "You currently do not have user-uploaded context, so answer using general medical knowledge "
+        "from reputable sources. Clearly mention that no user documents were matched."
+    )
+    return f"{instructions}\n\nQuestion: {question}\n\nAnswer:"
+
+
+def _generate_answer_from_model(prompt: str) -> str:
+    try:
+        model = _init_gemini()
+        response = model.generate_content(prompt)
+        answer_text = (response.text or "").strip()
+        return answer_text
+    except Exception as exc:
+        logger.exception("Gemini generation failed: %s", exc)
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to generate an answer from the AI model.",
+        )
+
+
 def _store_query(
     db: Session,
     user: User,
@@ -127,29 +151,23 @@ def ask_ai(
     sources = _serialize_sources(matches)
 
     if not sources:
-        answer = (
-            "I could not find any relevant information in your uploaded documents. "
-            "Please upload related medical files or ensure they have been processed."
-        )
-        record = _store_query(db, current_user, question, answer, [])
+        prompt = _build_fallback_prompt(question)
+        answer_text = _generate_answer_from_model(prompt)
+        if not answer_text:
+            answer_text = (
+                "No uploaded documents matched your query, and the AI could not synthesize an answer. "
+                "Please upload relevant research files and try again."
+            )
+        record = _store_query(db, current_user, question, answer_text, [])
         return QueryAnswerResponse(
             question=question,
-            answer=answer,
+            answer=answer_text,
             sources=[],
             created_at=record.created_at,
         )
 
     prompt = _build_prompt(question, sources)
-    try:
-        model = _init_gemini()
-        response = model.generate_content(prompt)
-        answer_text = (response.text or "").strip()
-    except Exception as exc:
-        logger.exception("Gemini generation failed: %s", exc)
-        raise HTTPException(
-            status_code=500,
-            detail="Failed to generate an answer from the AI model.",
-        )
+    answer_text = _generate_answer_from_model(prompt)
 
     if not answer_text:
         answer_text = (

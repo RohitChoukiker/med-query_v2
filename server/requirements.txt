@@ -36,3 +36,4 @@ python-dotenv
 email-validator
 tqdm
 google-generativeai
+requests

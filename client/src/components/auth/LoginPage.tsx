@@ -16,6 +16,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToSignup }) => {
   const [selectedRole, setSelectedRole] = useState<UserRole>('doctor');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [rememberSession, setRememberSession] = useState(false);
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -68,7 +69,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToSignup }) => {
 
     setIsLoading(true);
     try {
-      const success = await login(email, password, selectedRole);
+      const success = await login(email, password, selectedRole, { remember: rememberSession });
       if (success) {
         toast.success(`Welcome to MedQuery Agent, ${selectedRole}!`);
         
@@ -213,6 +214,21 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToSignup }) => {
                   );
                 })}
               </div>
+            </div>
+
+            <div className="flex items-center justify-between">
+              <label className="inline-flex items-center space-x-2 text-sm text-light-text-secondary dark:text-dark-text-secondary">
+                <input
+                  type="checkbox"
+                  className="rounded border-light-border/60 dark:border-dark-border/60 text-brand-600 focus:ring-brand-500"
+                  checked={rememberSession}
+                  onChange={(event) => setRememberSession(event.target.checked)}
+                />
+                <span>Stay signed in on this device</span>
+              </label>
+              <span className="text-xs text-light-text-muted dark:text-dark-text-muted">
+                Uses memory by default
+              </span>
             </div>
 
             {/* Medical Email and Password Input */}

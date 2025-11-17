@@ -1,10 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
-import { Sun, Moon, User, LogOut, Bell, Search, Stethoscope } from 'lucide-react';
+import { Sun, Moon, User, LogOut, Stethoscope } from 'lucide-react';
 import { useTheme } from '../../contexts/ThemeContext';
 import { useAuth } from '../../contexts/AuthContext';
-import UserProfilePopup from './UserProfilePopup';
-import { useLocation } from 'react-router-dom';
 
 interface NavbarProps {
   showThemeToggle?: boolean;
@@ -14,38 +12,7 @@ interface NavbarProps {
 const Navbar: React.FC<NavbarProps> = ({ showThemeToggle = true, forceVisible = false }) => {
   const { theme, toggleTheme } = useTheme();
   const { user, logout } = useAuth();
-  const location = useLocation();
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const profileButtonRef = useRef<HTMLDivElement>(null);
-
-  // State to control navbar visibility
-  const [isNavbarVisible, setIsNavbarVisible] = useState(false);
-
-  useEffect(() => {
-    if (forceVisible) {
-      setIsNavbarVisible(true);
-      return;
-    }
-
-    if (location.pathname === '/') {
-      setIsNavbarVisible(true); // Always show navbar on homepage
-      return;
-    }
-
-    const handleMouseMove = (event: MouseEvent) => {
-      if (event.clientY <= 50) {
-        setIsNavbarVisible(true);
-      } else {
-        setIsNavbarVisible(false);
-      }
-    };
-
-    window.addEventListener('mousemove', handleMouseMove);
-
-    return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-    };
-  }, [forceVisible, location.pathname]);
+  const isNavbarVisible = forceVisible || true;
 
   return (
     <motion.nav
@@ -99,9 +66,7 @@ const Navbar: React.FC<NavbarProps> = ({ showThemeToggle = true, forceVisible = 
                 {/* Medical User Profile */}
                 <div className="relative flex items-center space-x-3">
                   <div 
-                    ref={profileButtonRef}
-                    onClick={() => setIsProfileOpen(!isProfileOpen)}
-                    className="flex items-center space-x-3 cursor-pointer hover:bg-surface-light/50 dark:hover:bg-surface-dark/50 rounded-lg p-2 transition-all"
+                    className="flex items-center space-x-3 rounded-lg p-2 transition-all"
                   >
                     <div className="hidden sm:block text-right">
                       <p className="text-sm font-medium text-light-text-primary dark:text-dark-text-primary">
@@ -134,13 +99,6 @@ const Navbar: React.FC<NavbarProps> = ({ showThemeToggle = true, forceVisible = 
                   >
                     <LogOut className="w-4 h-4" />
                   </motion.button>
-
-                  {/* User Profile Popup */}
-                  <UserProfilePopup
-                    isOpen={isProfileOpen}
-                    onClose={() => setIsProfileOpen(false)}
-                    anchorRef={profileButtonRef}
-                  />
                 </div>
               </>
             )}

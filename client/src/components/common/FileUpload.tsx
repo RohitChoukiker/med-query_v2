@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Upload, X, FileText, Image, File, CheckCircle } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { DocumentUploadResponse, documentsAPI } from '../../api';
 
 interface FileUploadProps {
   acceptedTypes?: string[];
@@ -80,15 +81,35 @@ const FileUpload: React.FC<FileUploadProps> = ({
 
     setUploading(true);
     try {
-      // Simulate upload process
-      await new Promise(resolve => setTimeout(resolve, 2000));
-      
-      if (onUpload) {
-        onUpload(files);
+      const successResponses: DocumentUploadResponse[] = [];
+      const failedUploads: { name: string; error: string }[] = [];
+
+      for (const file of files) {
+        const response = await documentsAPI.upload(file);
+
+        if (response.error || !response.data) {
+          failedUploads.push({
+            name: file.name,
+            error: response.error || 'Unknown error occurred',
+          });
+        } else {
+          successResponses.push(response.data);
+        }
       }
-      
-      toast.success(`Successfully uploaded ${files.length} file(s)`);
-      setFiles([]);
+
+      if (successResponses.length) {
+        toast.success(`Successfully uploaded ${successResponses.length} file${successResponses.length > 1 ? 's' : ''}`);
+        if (onUpload) {
+          onUpload(files);
+        }
+        setFiles([]);
+      }
+
+      if (failedUploads.length) {
+        failedUploads.forEach(({ name, error }) =>
+          toast.error(`Failed to upload ${name}: ${error}`)
+        );
+      }
     } catch (error) {
       toast.error('Upload failed. Please try again.');
     } finally {

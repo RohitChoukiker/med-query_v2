@@ -7,13 +7,11 @@ import {
   Upload, 
   BookOpen, 
   Settings, 
-  BarChart3,
   Users,
   FileText,
   Heart,
   Brain,
   Shield,
-  Tag,
   Activity,
   Stethoscope
 } from 'lucide-react';
@@ -40,9 +38,8 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
         return [
           ...commonItems,
           { id: 'upload', label: 'Patient Reports', icon: Upload, description: 'Upload Medical Files' },
-          { id: 'history', label: 'Query History', icon: FileText, description: 'Previous Consultations' },
-          //{ id: 'bookmarks', label: 'Medical Bookmarks', icon: BookOpen, description: 'Saved Diagnoses' },
-          // { id: 'settings', label: 'Clinical Settings', icon: Settings, description: 'Preferences & Config' },
+         
+         
         ];
       
       case 'researcher':
@@ -60,7 +57,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
           ...commonItems,
           { id: 'health-tips', label: 'Health Guidance', icon: Heart, description: 'Wellness Tips & Advice' },
          // { id: 'bookmarks', label: 'Saved Health Info', icon: BookOpen, description: 'Important Answers' },
-          { id: 'settings', label: 'Health Profile', icon: Settings, description: 'Personal Settings' },
+       
         ];
       
       case 'admin':
@@ -85,7 +82,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
       case 'doctor':
         return { icon: Stethoscope, label: 'Dashboard', color: 'from-brand-500 to-accent-blue-light dark:to-accent-blue-dark' };
       case 'researcher':
-        return { icon: Brain, label: 'Research Portal', color: 'from-accent-purple-light to-pink-500 dark:from-accent-purple-dark dark:to-pink-400' };
+        return { icon: Brain, label: 'Research Portal', color: 'from-accent-blue-light to-accent-blue-dark' };
       case 'patient':
         return { icon: Heart, label: 'Health Portal', color: 'from-accent-green-light to-brand-600 dark:from-accent-green-dark dark:to-brand-500' };
       case 'admin':
@@ -102,7 +99,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
     <motion.aside
       initial={{ x: -300 }}
       animate={{ x: 0 }}
-      className="w-64 h-screen bg-surface-light/80 dark:bg-surface-dark/80 backdrop-blur-xl border-r border-light-border/50 dark:border-dark-border/50 overflow-y-auto shadow-professional dark:shadow-professional-dark"
+      className="w-64 h-full bg-surface-light/80 dark:bg-surface-dark/80 backdrop-blur-xl border-r border-light-border/50 dark:border-dark-border/50 overflow-y-auto shadow-professional dark:shadow-professional-dark"
     >
       <div className="p-6">
         {/* Medical Role Badge */}
@@ -113,7 +110,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
             </div>
             <div>
               <p className="text-white font-semibold text-sm">{roleInfo.label}</p>
-              <p className="text-white/80 text-xs capitalize">{user?.name}</p>
+              <p className="text-white/80 text-xs capitalize">{user?.full_name || user?.email}</p>
             </div>
           </div>
         </div>
@@ -176,12 +173,7 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
           <p className="text-xs text-light-text-muted dark:text-dark-text-muted">
             All medical systems operational
           </p>
-          <div className="mt-2 flex items-center space-x-1">
-            <div className="flex-1 h-1 bg-accent-green-light/20 rounded-full">
-              <div className="h-full w-full bg-accent-green-light rounded-full"></div>
-            </div>
-            <span className="text-xs text-accent-green-light font-medium">100%</span>
-          </div>
+          
         </div>
       </div>
     </motion.aside>

@@ -7,6 +7,7 @@ from database import engine, Base
 from router.auth import router as auth_router
 from router.document_upload import router as upload_router
 from router.ai import router as ai_router
+from router.pubmed import router as pubmed_router
 
 
 import uvicorn
@@ -109,6 +110,7 @@ async def health_check():
 app.include_router(auth_router)
 app.include_router(upload_router)
 app.include_router(ai_router)
+app.include_router(pubmed_router)
 
 
 if __name__ == "__main__":

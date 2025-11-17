@@ -14,6 +14,24 @@ export interface SignupResponse {
   user_role: string;
 }
 
+export interface QuerySource {
+  doc_id: string;
+  filename: string;
+  chunk_id: string;
+  snippet: string;
+}
+
+export interface QueryAnswer {
+  question: string;
+  answer: string;
+  sources: QuerySource[];
+  created_at: string;
+}
+
+export interface QueryHistoryPayload {
+  queries: QueryAnswer[];
+}
+
 export const API_ENDPOINTS = {
   // Authentication endpoints
   AUTH: {
@@ -22,6 +40,10 @@ export const API_ENDPOINTS = {
     LOGOUT: `${BASE_URL}/auth/logout`,
     ME: `${BASE_URL}/auth/me`,
     HEALTH: `${BASE_URL}/auth/health`,
+  },
+  AI: {
+    QUERY: `${BASE_URL}/ai/query`,
+    HISTORY: `${BASE_URL}/ai/history`,
   },
  
 };
@@ -196,7 +218,17 @@ export const getStoredToken = (): string | null => {
 
 // Ask AI Medical Assistant
 export const askAI = async (question: string) => {
-  return apiClient.post<{ answer: string }>("/ai/ask", { question });
+  return apiClient.post<QueryAnswer>(API_ENDPOINTS.AI.QUERY, { question });
+};
+
+export const getQueryHistory = async (limit: number = 5) => {
+  const url = `${API_ENDPOINTS.AI.HISTORY}?limit=${limit}`;
+  return apiClient.get<QueryHistoryPayload>(url);
+};
+
+export const aiAPI = {
+  ask: askAI,
+  history: getQueryHistory,
 };
 
 // Environment helper

@@ -8,9 +8,10 @@ import { useLocation } from 'react-router-dom';
 
 interface NavbarProps {
   showThemeToggle?: boolean;
+  forceVisible?: boolean;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ showThemeToggle = true }) => {
+const Navbar: React.FC<NavbarProps> = ({ showThemeToggle = true, forceVisible = false }) => {
   const { theme, toggleTheme } = useTheme();
   const { user, logout } = useAuth();
   const location = useLocation();
@@ -21,6 +22,11 @@ const Navbar: React.FC<NavbarProps> = ({ showThemeToggle = true }) => {
   const [isNavbarVisible, setIsNavbarVisible] = useState(false);
 
   useEffect(() => {
+    if (forceVisible) {
+      setIsNavbarVisible(true);
+      return;
+    }
+
     if (location.pathname === '/') {
       setIsNavbarVisible(true); // Always show navbar on homepage
       return;
@@ -39,7 +45,7 @@ const Navbar: React.FC<NavbarProps> = ({ showThemeToggle = true }) => {
     return () => {
       window.removeEventListener('mousemove', handleMouseMove);
     };
-  }, [location.pathname]);
+  }, [forceVisible, location.pathname]);
 
   return (
     <motion.nav

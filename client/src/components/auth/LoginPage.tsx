@@ -4,6 +4,7 @@ import { Eye, EyeOff, Stethoscope, Microscope, Heart, Shield, ArrowLeft, Activit
 import { useAuth, UserRole } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import Navbar from '../common/Navbar';
 
 interface LoginPageProps {
   onSwitchToSignup?: () => void;
@@ -40,14 +41,15 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToSignup }) => {
       icon: Heart, 
       color: 'from-accent-green-light to-brand-600 dark:from-accent-green-dark dark:to-brand-500',
       description: 'Health Information & Guidance'
-    },
-    { 
-      id: 'admin' as UserRole, 
-      label: 'System Administrator', 
-      icon: Shield, 
-      color: 'from-accent-orange-light to-red-500 dark:from-accent-orange-dark dark:to-red-400',
-      description: 'Platform Management & Analytics'
-    },
+    }
+    // ,
+    // { 
+    //   id: 'admin' as UserRole, 
+    //   label: 'System Administrator', 
+    //   icon: Shield, 
+    //   color: 'from-accent-orange-light to-red-500 dark:from-accent-orange-dark dark:to-red-400',
+    //   description: 'Platform Management & Analytics'
+    // },
   ];
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -130,7 +132,9 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToSignup }) => {
   };
 
   return (
-    <div className="min-h-screen bg-white/10 rounded-t-2xl dark:bg-dark-bg transition-colors duration-300 flex items-center justify-center p-4 font-medical relative" style={{ margin: '65px' }}>
+    <>
+      <Navbar forceVisible />
+      <div className="min-h-screen bg-white/10 rounded-t-2xl dark:bg-dark-bg transition-colors duration-300 flex items-center justify-center px-4 pb-6 pt-32 font-medical relative">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -359,7 +363,8 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToSignup }) => {
           </div>
         </motion.div>
       </div>
-    </div>
+      </div>
+    </>
   );
 };
 

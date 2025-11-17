@@ -128,3 +128,25 @@ class DocumentSearchResult(BaseModel):
 class DocumentSearchResponse(BaseModel):
     query: str
     results: List[DocumentSearchResult]
+
+
+class AIQueryRequest(BaseModel):
+    question: str = Field(..., min_length=3, description="Natural language medical question")
+
+
+class QuerySource(BaseModel):
+    doc_id: str
+    filename: str
+    chunk_id: str
+    snippet: str
+
+
+class QueryAnswerResponse(BaseModel):
+    question: str
+    answer: str
+    sources: List[QuerySource]
+    created_at: datetime
+
+
+class QueryHistoryResponse(BaseModel):
+    queries: List[QueryAnswerResponse]

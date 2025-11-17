@@ -27,3 +27,15 @@ class Document(Base):
     text_preview = Column(Text, default="")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+
+class UserQuery(Base):
+    __tablename__ = "user_queries"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, index=True, nullable=False)
+    role = Column(Enum(UserRole), nullable=False)
+    question = Column(Text, nullable=False)
+    answer = Column(Text, nullable=False)
+    sources = Column(Text, nullable=True)  # stored as JSON string
+    created_at = Column(DateTime(timezone=True), server_default=func.now())

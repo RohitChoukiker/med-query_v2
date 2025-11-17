@@ -19,6 +19,7 @@ import { useAuth, UserRole } from "../../contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 import { authAPI } from '../../api';
+import Navbar from "../common/Navbar";
 
 interface SignupPageProps {
   onBackToLanding?: () => void;
@@ -74,16 +75,17 @@ const SignupPage: React.FC<SignupPageProps> = ({
         "from-accent-green-light to-brand-600 dark:from-accent-green-dark dark:to-brand-500",
       description: "Individual seeking health information",
       requirements: ["Valid Email", "Age Verification"],
-    },
-    {
-      id: "admin" as UserRole,
-      label: "System Administrator",
-      icon: Shield,
-      color:
-        "from-accent-orange-light to-red-500 dark:from-accent-orange-dark dark:to-red-400",
-      description: "Healthcare system administrator",
-      requirements: ["Admin Approval", "Institution Verification"],
-    },
+    }
+    // ,
+    // {
+    //   id: "admin" as UserRole,
+    //   label: "System Administrator",
+    //   icon: Shield,
+    //   color:
+    //     "from-accent-orange-light to-red-500 dark:from-accent-orange-dark dark:to-red-400",
+    //   description: "Healthcare system administrator",
+    //   requirements: ["Admin Approval", "Institution Verification"],
+    // },
   ];
 
   const validateForm = () => {
@@ -219,7 +221,9 @@ const SignupPage: React.FC<SignupPageProps> = ({
   const passwordStrength = getPasswordStrength();
 
   return (
-    <div className="min-h-screen bg-light-bg dark:bg-dark-bg transition-colors duration-300 flex items-center justify-center p-4 font-medical">
+    <>
+      <Navbar forceVisible />
+      <div className="min-h-screen bg-light-bg dark:bg-dark-bg transition-colors duration-300 flex items-center justify-center px-4 pb-6 pt-32 font-medical">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -227,7 +231,7 @@ const SignupPage: React.FC<SignupPageProps> = ({
         className="w-full"
       >
         {/* Medical Back Button */}
-        {onBackToLanding && (
+        {/* {onBackToLanding && (
           <motion.button
             onClick={onBackToLanding}
             initial={{ opacity: 0, x: -20 }}
@@ -238,7 +242,7 @@ const SignupPage: React.FC<SignupPageProps> = ({
             <ArrowLeft className="w-4 h-4" />
             <span>Back to Medical Portal</span>
           </motion.button>
-        )}
+        )} */}
 
         {/* Medical Header */}
         <div className="text-center mb-8">
@@ -686,7 +690,8 @@ const SignupPage: React.FC<SignupPageProps> = ({
           </div>
         </motion.div>
       </motion.div>
-    </div>
+      </div>
+    </>
   );
 };
 

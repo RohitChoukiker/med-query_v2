@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Eye, EyeOff, Stethoscope, Microscope, Heart, Shield, ArrowLeft, Activity } from 'lucide-react';
+import { Eye, EyeOff, Stethoscope, Microscope, Heart, Activity } from 'lucide-react';
 import { useAuth, UserRole } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
@@ -19,6 +19,13 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToSignup }) => {
   const [isPopupOpen, setIsPopupOpen] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  const roleCredentials: Record<UserRole, { email: string; password: string }> = {
+    doctor: { email: 'doctor@gmail.com', password: 'Doctor@123' },
+    researcher: { email: 'researcher@gmail.com', password: 'Researcher@123' },
+    patient: { email: 'patient@gmail.com', password: 'Patient@123' },
+    admin: { email: 'airohit@protonmail.com', password: 'Rohit@123' }
+  };
 
   const roles = [
     { 
@@ -103,29 +110,22 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToSignup }) => {
     }
   };
 
-  const fillDoctorCredentials = () => {
-    setEmail('doctor@gmail.com');
-    setPassword('Doctor@123');
-    setSelectedRole('doctor');
+  const applyRoleCredentials = (role: UserRole) => {
+    setSelectedRole(role);
+    const creds = roleCredentials[role];
+    if (creds) {
+      setEmail(creds.email);
+      setPassword(creds.password);
+    } else {
+      setEmail('');
+      setPassword('');
+    }
   };
 
-  const fillResearcherCredentials = () => {
-    setEmail('researcher@gmail.com');
-    setPassword('Researcher@123');
-    setSelectedRole('researcher');
-  };
-
-  const fillPatientCredentials = () => {
-    setEmail('patient@gmail.com');
-    setPassword('Patient@123');
-    setSelectedRole('patient');
-  };
-
-  const fillAdminCredentials = () => {
-    setEmail('airohit@protonmail.com');
-    setPassword('Rohit@123');
-    setSelectedRole('admin');
-  };
+  const fillDoctorCredentials = () => applyRoleCredentials('doctor');
+  const fillResearcherCredentials = () => applyRoleCredentials('researcher');
+  const fillPatientCredentials = () => applyRoleCredentials('patient');
+ 
 
   const togglePopup = () => {
     setIsPopupOpen(!isPopupOpen);
@@ -157,12 +157,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToSignup }) => {
           <p className="text-light-text-secondary dark:text-dark-text-secondary">
             AI-Powered Medical Intelligence Platform
           </p>
-          <div className="mt-3 inline-flex items-center px-3 py-1 bg-brand-100/50 dark:bg-brand-900/30 rounded-full">
-            <Activity className="w-3 h-3 text-brand-600 dark:text-brand-400 mr-1" />
-            <span className="text-xs font-medium text-brand-700 dark:text-brand-300">
-              Secure Medical Login
-            </span>
-          </div>
+         
         </div>
 
         {/* Medical Login Form */}
@@ -175,17 +170,28 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToSignup }) => {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Medical Role Selection */}
             <div>
-              <label className="block text-sm font-medium text-light-text-primary dark:text-dark-text-primary mb-3">
-                Select Your Medical Role
-              </label>
-              <div className="flex gap-3 w-full overflow-x-auto">
+              <div className="flex flex-col gap-2 mb-3">
+                <div className="flex items-center justify-between">
+                  <label className="block text-sm font-medium text-light-text-primary dark:text-dark-text-primary">
+                    Select Your Medical Role
+                  </label>
+                  <button
+                    type="button"
+                    onClick={togglePopup}
+                    className="text-xs font-semibold text-brand-600 dark:text-brand-400 hover:underline"
+                  >
+                    Click here for sample login
+                  </button>
+                </div>
+              </div>
+              <div className="flex gap-3 w-full overflow-x-auto pb-2">
                 {roles.map((role) => {
                   const Icon = role.icon;
                   return (
                     <motion.button
                       key={role.id}
                       type="button"
-                      onClick={() => setSelectedRole(role.id)}
+                      onClick={() => applyRoleCredentials(role.id)}
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       className={`flex-1 min-w-[180px] p-4 rounded-xl border-2 transition-all duration-300 ${
@@ -291,13 +297,11 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToSignup }) => {
 
       {/* Popups Box Container */}
       <div 
-        className="absolute top-0 right-0 bg-white dark:bg-dark-bg shadow-lg rounded-lg p-1 border border-light-border/50 dark:border-dark-border/50 hover:shadow-xl hover:border-brand-500 animate-pulse transition-all duration-500 ease-in-out cursor-pointer"
+        className="absolute top-20 right-4 bg-white dark:bg-dark-bg shadow-lg rounded-lg p-1 border border-light-border/50 dark:border-dark-border/50 hover:shadow-xl hover:border-brand-500  cursor-pointer"
         style={{ width: '200px' }}
         onClick={togglePopup}
       >
-        <h3 className="text-sm  font-bold text-light-text-primary dark:text-dark-text-primary mb-2 text-center whitespace-nowrap">
-          Click for Login Credentials
-        </h3>
+        
         <motion.div
           initial={{ height: 0, opacity: 0 }}
           animate={isPopupOpen ? { height: 'auto', opacity: 1 } : { height: 0, opacity: 0 }}
@@ -348,18 +352,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToSignup }) => {
             </div>
 
             {/* Popup for Admin Credentials */}
-            <div 
-              className="bg-white dark:bg-dark-bg shadow-md rounded-md p-2 border border-light-border/50 dark:border-dark-border/50 cursor-pointer hover:border-gray-400 hover:shadow-lg transition-all duration-500 ease-in-out"
-              onClick={fillAdminCredentials}
-            >
-              <h4 className="text-xs font-semibold text-light-text-primary dark:text-dark-text-primary mb-1">Admin</h4>
-              <p className="text-xs text-light-text-secondary dark:text-dark-text-secondary mb-1">
-                <strong>Email:</strong> airohit@protonmail.com
-              </p>
-              <p className="text-xs text-light-text-secondary dark:text-dark-text-secondary">
-                <strong>Password:</strong> Rohit@123
-              </p>
-            </div>
+           
           </div>
         </motion.div>
       </div>

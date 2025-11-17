@@ -5,21 +5,27 @@ import os
 import uuid
 import shutil
 import warnings
+import logging
 from pathlib import Path
 from typing import List
 import numpy as np
-import faiss
 from sentence_transformers import SentenceTransformer
+import faiss
 from pdfminer.high_level import extract_text as pdf_extract
 import docx
 from PIL import Image
 import pytesseract
+from tqdm.auto import tqdm
 
 # Suppress FutureWarning from huggingface_hub about resume_download
 warnings.filterwarnings("ignore", category=FutureWarning, module="huggingface_hub")
 
+# Configure logger
+logger = logging.getLogger(__name__)
+
 # --- Config ---
-DATA_DIR = Path("./data")
+BASE_DIR = Path(__file__).resolve().parent.parent
+DATA_DIR = BASE_DIR / "data"
 FILES_DIR = DATA_DIR / "files"
 VECTOR_DIR = DATA_DIR / "vectors"
 
@@ -64,7 +70,7 @@ def extract_text_from_file(path: Path) -> str:
         except Exception:
             # fallback: try OCR page-by-page (slow)
             try:
-                from pdf2image import convert_from_path
+                from pdf2image import convert_from_path  # type: ignore
                 text = ""
                 pages = convert_from_path(str(path))
                 for p in pages:
@@ -116,10 +122,12 @@ def process_document(doc_id: str, filepath: str, filename: str, user_id: int, db
     else:
         db = db_session
     
+    logger.info("Processing document %s (%s) for user %s", doc_id, filename, user_id)
     try:
         path = Path(filepath)
         text = extract_text_from_file(path)
         preview = text[:2000]
+        logger.info("Extracted %s characters from %s", len(text), filename)
         
         # chunk & embed
         chunks = chunk_text(text)
@@ -129,16 +137,22 @@ def process_document(doc_id: str, filepath: str, filename: str, user_id: int, db
             if doc:
                 db.delete(doc)
                 db.commit()
+            logger.warning("No text extracted for document %s. Entry removed.", doc_id)
             return False
         
         embeddings = get_model().encode(chunks, show_progress_bar=False)
+        embeddings = np.array(embeddings).astype("float32")
+        logger.info("Chunked document into %s chunks", len(chunks))
         
-        # append to FAISS index and metas
+        # append to FAISS index and metas with progress bar
         global index, metas, index_path, meta_path
         
-        index.add(np.array(embeddings).astype("float32"))
-        
-        # store per chunk metadata
+        progress = tqdm(
+            total=len(chunks),
+            desc=f"Indexing {filename}",
+            unit="chunk",
+            leave=False
+        )
         for i, chunk in enumerate(chunks):
             metas.append({
                 "doc_id": doc_id,
@@ -147,10 +161,15 @@ def process_document(doc_id: str, filepath: str, filename: str, user_id: int, db
                 "filename": filename,
                 "user_id": user_id
             })
+            progress.update(1)
+        progress.close()
+
+        index.add(embeddings)
         
         # persist index & metas
         faiss.write_index(index, str(index_path))
         np.save(str(meta_path), np.array(metas, dtype=object))
+        logger.info("Persisted FAISS index to %s (total vectors: %s)", index_path, index.ntotal)
         
         # update db
         doc = db.query(Document).filter(Document.id == doc_id).first()
@@ -159,8 +178,12 @@ def process_document(doc_id: str, filepath: str, filename: str, user_id: int, db
             doc.text_preview = preview
             db.add(doc)
             db.commit()
+            logger.info("Document %s marked as processed", doc_id)
         
         return True
+    except Exception as exc:
+        logger.exception("Failed to process document %s: %s", doc_id, exc)
+        raise
     finally:
         # Only close if we created the session
         if db_session is None:

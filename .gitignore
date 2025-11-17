@@ -11,6 +11,8 @@ Thumbs.db
 
 # Python
 server/__pycache__/
+server/data/
+
 *.py[cod]
 *$py.class
 *.so

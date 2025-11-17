@@ -34,3 +34,4 @@ passlib[bcrypt]
 pydantic
 python-dotenv
 email-validator
+tqdm

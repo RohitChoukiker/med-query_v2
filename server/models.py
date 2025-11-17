@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, Enum
+from sqlalchemy import Column, Integer, String, DateTime, Enum, Boolean, Text
 from sqlalchemy.sql import func
 from database import Base, UserRole
 
@@ -13,5 +13,17 @@ class User(Base):
     license_number = Column(String, nullable=True)
     institution = Column(String, nullable=True)
     specialization = Column(String, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+class Document(Base):
+    __tablename__ = "documents"
+
+    id = Column(String, primary_key=True, index=True)
+    user_id = Column(Integer, index=True, nullable=False)
+    filename = Column(String, nullable=False)
+    filepath = Column(String, nullable=False)
+    processed = Column(Boolean, default=False)
+    text_preview = Column(Text, default="")
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())

@@ -5,7 +5,7 @@ from fastapi.exceptions import RequestValidationError
 from pydantic import ValidationError
 from database import engine, Base
 from router.auth import router as auth_router
-from schemas import Question
+from router.document_upload import router as upload_router
 
 
 import uvicorn
@@ -106,6 +106,7 @@ async def health_check():
 
 
 app.include_router(auth_router)
+app.include_router(upload_router)
 
 
 if __name__ == "__main__":

@@ -20,3 +20,17 @@ torch
 python-magic
 
 unstructured
+pinecone-client
+pypdf
+python-docx
+faiss-cpu
+pdfminer.six
+pytesseract
+pillow
+python-multipart
+sqlalchemy
+python-jose[cryptography]
+passlib[bcrypt]
+pydantic
+python-dotenv
+email-validator

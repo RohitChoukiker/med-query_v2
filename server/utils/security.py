@@ -86,14 +86,20 @@ class SecurityUtils:
         # Access tokens expire in 1 hour
         return SecurityUtils.generate_jwt_token(payload, expires_in=3600)
 
+def get_token_from_request():
+    token = request.headers.get('Authorization')
+    if not token:
+        return jsonify({'message': 'Token is missing'}), 401
+    return token
+
 def token_required(f):
     """Decorator to require valid JWT token for API endpoints"""
     @wraps(f)
     def decorated(*args, **kwargs):
-        token = request.headers.get('Authorization')
+        token = get_token_from_request()
         
-        if not token:
-            return jsonify({'message': 'Token is missing'}), 401
+        if isinstance(token, tuple):  # Check if token is a Flask response tuple
+            return token  # Return the JSONResponse directly if token is missing
         
         try:
             # Remove 'Bearer ' prefix if present
@@ -105,7 +111,7 @@ def token_required(f):
                 return jsonify({'message': 'Token is invalid'}), 401
             
             # Add token data to request context
-            request.current_user = data
+            request.user = data
             
         except Exception as e:
             return jsonify({'message': 'Token is invalid'}), 401
@@ -119,7 +125,7 @@ def admin_required(f):
     @wraps(f)
     @token_required
     def decorated(*args, **kwargs):
-        if request.current_user.get('role') != 'admin':
+        if request.user.get('role') != 'admin':
             return jsonify({'message': 'Admin access required'}), 403
         return f(*args, **kwargs)
     

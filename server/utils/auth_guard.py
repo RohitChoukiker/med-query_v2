@@ -2,7 +2,7 @@
 Role-based access control utilities
 """
 from functools import wraps
-from flask import request, jsonify, g
+from fastapi import Request
 from typing import List, Optional, Dict, Any
 from enum import Enum
 

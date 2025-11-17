@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr, Field, validator
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 from database import UserRole
 import re
@@ -102,3 +102,29 @@ class ErrorResponse(BaseModel):
 # Question Schema
 class Question(BaseModel):
     query: str = Field(..., description="The question to be processed by the AI model")
+
+# Document Schemas
+class DocumentUploadResponse(BaseModel):
+    id: str
+    filename: str
+    processed: bool
+
+class DocumentListResponse(BaseModel):
+    id: str
+    filename: str
+    processed: bool
+    preview: str
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+class DocumentSearchResult(BaseModel):
+    doc_id: str
+    text: str
+    filename: str
+    chunk_id: str
+
+class DocumentSearchResponse(BaseModel):
+    query: str
+    results: List[DocumentSearchResult]

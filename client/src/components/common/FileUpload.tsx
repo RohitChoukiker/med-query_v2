@@ -178,7 +178,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
                 className="flex items-center justify-between p-3 bg-white/50 dark:bg-gray-800/50 backdrop-blur-xl rounded-xl border border-gray-200/50 dark:border-gray-700/50"
               >
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-gradient-to-br from-teal-500 to-blue-600 rounded-lg flex items-center justify-center">
+                  <div className="w-10 h-10 bg-[#0EA5E9] rounded-lg flex items-center justify-center">
                     <Icon className="w-5 h-5 text-white" />
                   </div>
                   <div>
@@ -209,7 +209,7 @@ const FileUpload: React.FC<FileUploadProps> = ({
           animate={{ opacity: 1, y: 0 }}
           onClick={handleUpload}
           disabled={uploading}
-          className="w-full bg-gradient-to-r from-teal-500 to-blue-600 text-white py-3 rounded-xl font-medium transition-all hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+          className="w-full bg-[#0EA5E9] text-white py-3 rounded-xl font-medium transition-all hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
         >
           {uploading ? (
             <>

@@ -23,7 +23,6 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/ai", tags=["ai"])
 
-
 GEMINI_MODEL = "models/gemini-2.5-pro-preview-03-25"
 
 _gemini_model = None

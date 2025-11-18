@@ -554,9 +554,9 @@ const AppContent: React.FC = () => {
     <div className="min-h-screen bg-light-bg dark:bg-dark-bg transition-colors duration-300">
       <Navbar />
       <div className="pt-16 h-[calc(100vh-4rem)]">
-        <div className="flex h-full">
+        <div className="flex h-[calc(100vh-4rem)]">
           <Sidebar activeTab={activeTab} setActiveTab={setActiveTab} />
-          <main className="flex-1 overflow-y-auto">
+          <main className="flex-1 overflow-y-auto h-full">
           <Routes>
             <Route path="/dashboard" element={renderContent()} />
             <Route path="/chat" element={renderChatExperience()} />

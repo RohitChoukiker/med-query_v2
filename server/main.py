@@ -34,20 +34,18 @@ app = FastAPI(
     redoc_url="/redoc"
 )
 
-# Configure CORS
-FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
 
+FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-        "http://localhost:3000", 
+        "http://localhost:3000",
         "http://localhost:5173",
         "http://127.0.0.1:3000",
         "http://127.0.0.1:5173",
-        FRONTEND_URL,  # Add your frontend production URL
-        "*"  # For development only - remove in production
-    ], 
-    allow_credentials=True,
+        FRONTEND_URL,            # production origin (exact)
+    ],
+    allow_credentials=True,     # keep True so cookies are allowed
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )

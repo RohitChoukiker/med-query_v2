@@ -142,9 +142,11 @@ async def login(
     except HTTPException:
         raise
     except Exception as e:
+        # Log the full exception with traceback so container logs show the root cause
+        logger.exception(f"Unexpected error during login for {user_credentials.email}: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="An error occurred during login. Please try again."
+            detail="An internal error occurred during login. Check server logs for details."
         )
 
 @router.get("/me", response_model=UserProfile, responses={401: {"model": ErrorResponse}})

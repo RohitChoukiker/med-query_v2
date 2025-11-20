@@ -5,17 +5,25 @@ from datetime import datetime
 import enum
 import os
 from dotenv import load_dotenv
+import logging
 
 # Load environment variables
 load_dotenv()
 
-# SQLite database URL
+# Determine database URL; fall back to a local SQLite file for containers
 SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL")
+if not SQLALCHEMY_DATABASE_URL:
+    logging.warning("DATABASE_URL not set, falling back to local SQLite database 'sqlite:///./medquery.db'")
+    SQLALCHEMY_DATABASE_URL = "sqlite:///./medquery.db"
 
 # Create SQLAlchemy engine
-engine = create_engine(
-    SQLALCHEMY_DATABASE_URL
-)
+if SQLALCHEMY_DATABASE_URL.startswith("sqlite"):
+    engine = create_engine(
+        SQLALCHEMY_DATABASE_URL,
+        connect_args={"check_same_thread": False}
+    )
+else:
+    engine = create_engine(SQLALCHEMY_DATABASE_URL)
 
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

@@ -97,7 +97,7 @@ async def health_check():
     return {
         "status": "healthy",
         "service": "MedQuery Agent API",
-        "version": "1.0.0",
+        "version": "1.3.0",
         "database": "connected",
         "authentication": "active"
     }

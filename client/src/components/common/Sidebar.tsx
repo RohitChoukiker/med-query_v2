@@ -99,24 +99,22 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
     <motion.aside
       initial={{ x: -300 }}
       animate={{ x: 0 }}
-      className="w-64 h-full bg-surface-light/80 dark:bg-surface-dark/80 backdrop-blur-xl border-r border-light-border/50 dark:border-dark-border/50 overflow-y-auto shadow-professional dark:shadow-professional-dark"
+      className="w-16 md:w-64 h-full bg-surface-light/80 dark:bg-surface-dark/80 backdrop-blur-xl border-r border-light-border/50 dark:border-dark-border/50 overflow-y-auto shadow-professional dark:shadow-professional-dark"
     >
-      <div className="p-6">
+      <div className="p-2 md:p-6 flex flex-col items-center md:items-start">
         {/* Medical Role Badge */}
-        <div className={`mb-6 p-4 bg-gradient-to-br ${roleInfo.color} rounded-2xl shadow-medical dark:shadow-medical-dark`}>
-          <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-white/20 backdrop-blur-xl rounded-xl flex items-center justify-center">
-              <RoleIcon className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <p className="text-white font-semibold text-sm">{roleInfo.label}</p>
-              <p className="text-white/80 text-xs capitalize">{user?.full_name || user?.email}</p>
-            </div>
+        <div className={`mb-6 p-2 md:p-4 bg-gradient-to-br ${roleInfo.color} rounded-2xl shadow-medical dark:shadow-medical-dark w-full flex items-center justify-center md:justify-start`}> 
+          <div className="w-10 h-10 bg-white/20 backdrop-blur-xl rounded-xl flex items-center justify-center">
+            <RoleIcon className="w-5 h-5 text-white" />
+          </div>
+          <div className="hidden md:block ml-3">
+            <p className="text-white font-semibold text-sm">{roleInfo.label}</p>
+            <p className="text-white/80 text-xs capitalize">{user?.full_name || user?.email}</p>
           </div>
         </div>
 
         {/* Medical Navigation Menu */}
-        <div className="space-y-2">
+        <div className="space-y-2 w-full">
           {menuItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id || location.pathname === `/${item.id}`;
@@ -132,11 +130,11 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
                 whileTap={{ scale: 0.98 }}
                 className={`w-full group relative overflow-hidden rounded-xl transition-all duration-300 ${
                   isActive || location.pathname === `/${item.id}`
-                    ? 'bg-gradient-to-r from-brand-500/20 to-accent-blue-light/20 dark:to-accent-blue-dark/20 text-brand-600 dark:text-brand-400 border border-brand-200/50 dark:border-brand-700/50 shadow-medical dark:shadow-medical-dark'
+                    ? 'bg-gradient-to-r from-brand-500/10 to-accent-blue-light/10 dark:to-accent-blue-dark/10 text-brand-600 dark:text-brand-400 border border-brand-200/20 dark:border-brand-700/20 shadow-medical dark:shadow-medical-dark'
                     : 'text-light-text-secondary dark:text-dark-text-secondary hover:bg-surface-light/70 dark:hover:bg-surface-dark/70 hover:text-light-text-primary dark:hover:text-dark-text-primary border border-transparent hover:border-light-border/30 dark:hover:border-dark-border/30'
                 }`}
               >
-                <div className="flex items-center space-x-3 px-4 py-3">
+                <div className="flex items-center md:space-x-3 justify-center md:justify-start px-0 md:px-4 py-3">
                   <div className={`w-10 h-10 rounded-xl flex items-center justify-center transition-all ${
                     isActive 
                       ? 'bg-gradient-to-br from-brand-500 to-accent-blue-light dark:to-accent-blue-dark shadow-lg' 
@@ -144,17 +142,17 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
                   }`}>
                     <Icon className={`w-5 h-5 ${isActive ? 'text-white' : 'text-current'}`} />
                   </div>
-                  <div className="flex-1 text-left">
+                  <div className="hidden md:block flex-1 text-left">
                     <p className="font-medium text-sm">{item.label}</p>
                     <p className="text-xs opacity-70">{item.description}</p>
                   </div>
                 </div>
                 
-                {/* Active Indicator */}
+                {/* Active Indicator for md screens */}
                 {isActive && (
                   <motion.div
                     layoutId="activeTab"
-                    className="absolute right-0 top-0 bottom-0 w-1 bg-gradient-to-b from-brand-500 to-accent-blue-light dark:to-accent-blue-dark rounded-l-full"
+                    className="hidden md:block absolute right-0 top-0 bottom-0 w-1 bg-gradient-to-b from-brand-500 to-accent-blue-light dark:to-accent-blue-dark rounded-l-full"
                   />
                 )}
               </motion.button>
@@ -162,18 +160,25 @@ const Sidebar: React.FC<SidebarProps> = ({ activeTab, setActiveTab }) => {
           })}
         </div>
 
-        {/* Medical Status Indicator */}
-        <div className="mt-8 p-4 bg-gradient-to-br from-accent-green-light/10 to-brand-50/50 dark:from-accent-green-dark/10 dark:to-brand-900/20 rounded-xl border border-accent-green-light/20 dark:border-accent-green-dark/20">
-          <div className="flex items-center space-x-2 mb-2">
-            <div className="w-2 h-2 bg-accent-green-light rounded-full animate-pulse"></div>
-            <span className="text-xs font-medium text-accent-green-light dark:text-accent-green-dark">
-              System Status
+        {/* Medical Status Indicator (hidden on small screens, full on md+) */}
+        <div className="mt-6 w-full hidden md:block">
+          <div className="flex items-center md:flex-col md:items-start justify-center md:justify-start p-2 md:p-4 bg-gradient-to-br from-accent-green-light/10 to-brand-50/50 dark:from-accent-green-dark/10 dark:to-brand-900/20 rounded-xl border border-accent-green-light/20 dark:border-accent-green-dark/20 w-full">
+            <div className="flex items-center space-x-2">
+              <div className="w-2.5 h-2.5 bg-accent-green-light rounded-full animate-pulse" />
+              <span className="hidden md:inline-block text-xs font-medium text-accent-green-light dark:text-accent-green-dark">
+                System Status
+              </span>
+            </div>
+
+            <p className="hidden md:block text-xs text-light-text-muted dark:text-dark-text-muted mt-2 md:mt-3">
+              All medical systems operational
+            </p>
+
+            {/* Small badge for mobile */}
+            <span className="md:hidden ml-3 text-[10px] px-2 py-1 rounded-full bg-accent-green-light/20 text-accent-green-light font-semibold">
+              OK
             </span>
           </div>
-          <p className="text-xs text-light-text-muted dark:text-dark-text-muted">
-            All medical systems operational
-          </p>
-          
         </div>
       </div>
     </motion.aside>

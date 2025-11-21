@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { authAPI, apiClient } from '../api';
+import Spinner from '../components/common/Spinner';
 
 export type UserRole = 'doctor' | 'researcher' | 'patient' | 'admin';
 
@@ -165,8 +166,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   if (isLoading) {
-    // You could return a loading component here
-    return <div>Loading...</div>;
+    // Show a nicer spinner while we check auth state
+    return <Spinner label="Loading application..." />;
   }
 
   return (

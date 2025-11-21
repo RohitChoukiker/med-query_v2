@@ -144,7 +144,7 @@ const LandingPage: React.FC<LandingPageProps> = ({
     { name: "Cardiology", icon: Heart, patients: "" },
     { name: "Neurology", icon: Brain, patients: "" },
     { name: "Radiology", icon: Activity, patients: "" },
-    { name: "Pathology", icon: Microscope, patients: "" },
+    { name: "Pathology", icon: Microscope, patients: "Rohit" },
   ];
 
   useEffect(() => {
@@ -292,9 +292,7 @@ const LandingPage: React.FC<LandingPageProps> = ({
                     <p className="text-sm font-medium text-light-text-primary dark:text-dark-text-primary mb-1">
                       {specialty.name}
                     </p>
-                    <p className="text-xs text-light-text-muted dark:text-dark-text-muted">
-                      {specialty.patients} patients
-                    </p>
+                   
                   </motion.div>
                 );
               })}

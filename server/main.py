@@ -36,6 +36,7 @@ app = FastAPI(
 
 
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:5173")
+FRONTEND_URL = FRONTEND_URL.rstrip("/")  
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
@@ -43,9 +44,9 @@ app.add_middleware(
         "http://localhost:5173",
         "http://127.0.0.1:3000",
         "http://127.0.0.1:5173",
-        FRONTEND_URL,            # production origin (exact)
+        FRONTEND_URL,        
     ],
-    allow_credentials=True,     # keep True so cookies are allowed
+    allow_credentials=True,    
     allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
     allow_headers=["*"],
 )

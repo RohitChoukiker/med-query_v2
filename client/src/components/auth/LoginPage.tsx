@@ -173,9 +173,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToSignup }) => {
             <div>
               <div className="flex flex-col gap-2 mb-3">
                 <div className="flex items-center justify-between">
-                  <label className="block text-sm font-medium text-light-text-primary dark:text-dark-text-primary">
-                    Select Your Medical Role
-                  </label>
+                 
                   <button
                     type="button"
                     onClick={togglePopup}
@@ -216,20 +214,7 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToSignup }) => {
               </div>
             </div>
 
-            <div className="flex items-center justify-between">
-              <label className="inline-flex items-center space-x-2 text-sm text-light-text-secondary dark:text-dark-text-secondary">
-                <input
-                  type="checkbox"
-                  className="rounded border-light-border/60 dark:border-dark-border/60 text-brand-600 focus:ring-brand-500"
-                  checked={rememberSession}
-                  onChange={(event) => setRememberSession(event.target.checked)}
-                />
-                <span>Stay signed in on this device</span>
-              </label>
-              <span className="text-xs text-light-text-muted dark:text-dark-text-muted">
-                Uses memory by default
-              </span>
-            </div>
+           
 
             {/* Medical Email and Password Input */}
             <div className="flex flex-col md:flex-row gap-4">

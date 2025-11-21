@@ -280,6 +280,18 @@ const LoginPage: React.FC<LoginPageProps> = ({ onSwitchToSignup }) => {
             </motion.button>
 
             {/* Signup Link */}
+            <div className="flex items-center justify-between mt-2">
+              <label className="inline-flex items-center text-sm text-light-text-secondary dark:text-dark-text-secondary">
+                <input
+                  type="checkbox"
+                  checked={rememberSession}
+                  onChange={(e) => setRememberSession(e.target.checked)}
+                  className="mr-2 rounded"
+                />
+                Remember this device
+              </label>
+            </div>
+
             <div className="text-center">
               <p className="text-sm text-light-text-secondary dark:text-dark-text-secondary">
                 New to MedQuery Agent?{' '}

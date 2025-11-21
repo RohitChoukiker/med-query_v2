@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { authAPI, apiClient } from '../api';
 import Spinner from '../components/common/Spinner';
+import { tokenStorage } from '../utils/tokenStorage';
 
 export type UserRole = 'doctor' | 'researcher' | 'patient' | 'admin';
 
@@ -59,28 +60,97 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   // Check if user is already logged in
   useEffect(() => {
     const checkAuth = async () => {
-      try {
-        const response = await authAPI.getCurrentUser();
-        
-        if (response.data && response.status === 200) {
-          const userData = response.data;
-          setUser({
-            id: userData.id.toString(),
-            email: userData.email,
-            full_name: userData.full_name,
-            role: userData.role as UserRole,
-            license_number: userData.license_number,
-            institution: userData.institution,
-            specialization: userData.specialization
-          });
-        } else {
-          apiClient.removeToken();
+      // Fast path: if we have a stored token, try to use cached user so UI isn't blocked.
+      const hasToken = tokenStorage.hasToken();
+
+      if (hasToken && typeof window !== 'undefined') {
+        try {
+          const cached = window.localStorage.getItem('mq_user');
+          if (cached) {
+            try {
+              const parsed = JSON.parse(cached);
+              setUser(parsed as User);
+            } catch (e) {
+              // ignore parse error and continue to fetch fresh
+            }
+          }
+        } catch (e) {
+          // ignore localStorage errors
         }
-      } catch (error) {
-        console.error('Auth check failed:', error);
-        apiClient.removeToken();
-      } finally {
+      }
+
+      // If we have a token but no cached user, wait for a background refresh
+      // to avoid rendering unauthenticated routes (which redirect to '/').
+      const cachedUser = typeof window !== 'undefined' ? window.localStorage.getItem('mq_user') : null;
+
+      if (hasToken && !cachedUser) {
+        // No cache available — block rendering until we verify token and fetch user
+        try {
+          const response = await authAPI.getCurrentUser();
+          if (response.data && response.status === 200) {
+            const userData = response.data;
+            const freshUser: User = {
+              id: userData.id.toString(),
+              email: userData.email,
+              full_name: userData.full_name,
+              role: userData.role as UserRole,
+              license_number: userData.license_number,
+              institution: userData.institution,
+              specialization: userData.specialization
+            };
+            setUser(freshUser);
+            try {
+              if (typeof window !== 'undefined') {
+                window.localStorage.setItem('mq_user', JSON.stringify(freshUser));
+              }
+            } catch (e) {
+              // ignore storage errors
+            }
+          } else {
+            apiClient.removeToken();
+            setUser(null);
+            try { if (typeof window !== 'undefined') { window.localStorage.removeItem('mq_user'); } } catch {}
+          }
+        } catch (error) {
+          console.error('Auth refresh failed:', error);
+        } finally {
+          setIsLoading(false);
+        }
+      } else {
+        // Either no token or we had a cached user — allow rendering and refresh in background if token exists
         setIsLoading(false);
+
+        if (hasToken) {
+          try {
+            const response = await authAPI.getCurrentUser();
+            if (response.data && response.status === 200) {
+              const userData = response.data;
+              const freshUser: User = {
+                id: userData.id.toString(),
+                email: userData.email,
+                full_name: userData.full_name,
+                role: userData.role as UserRole,
+                license_number: userData.license_number,
+                institution: userData.institution,
+                specialization: userData.specialization
+              };
+              setUser(freshUser);
+              try {
+                if (typeof window !== 'undefined') {
+                  window.localStorage.setItem('mq_user', JSON.stringify(freshUser));
+                }
+              } catch (e) {
+                // ignore storage errors
+              }
+            } else {
+              apiClient.removeToken();
+              setUser(null);
+              try { if (typeof window !== 'undefined') { window.localStorage.removeItem('mq_user'); } } catch {}
+            }
+          } catch (error) {
+            console.error('Auth background refresh failed:', error);
+          }
+        }
       }
     };
 
@@ -107,7 +177,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         
         if (userResponse.data && userResponse.status === 200) {
           const userData = userResponse.data;
-          setUser({
+          const loggedUser: User = {
             id: userData.id.toString(),
             email: userData.email,
             full_name: userData.full_name,
@@ -115,7 +185,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
             license_number: userData.license_number,
             institution: userData.institution,
             specialization: userData.specialization
-          });
+          };
+          setUser(loggedUser);
+          try { if (typeof window !== 'undefined') { window.localStorage.setItem('mq_user', JSON.stringify(loggedUser)); } } catch {}
           return true;
         }
       }
@@ -162,6 +234,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Always clean up locally
       setUser(null);
       apiClient.removeToken();
+      try { if (typeof window !== 'undefined') { window.localStorage.removeItem('mq_user'); } } catch {}
     }
   };
 

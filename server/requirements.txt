@@ -29,3 +29,7 @@ google-generativeai
 requests
 
 psycopg2-binary
+
+# Pin bcrypt and cffi to ensure a compatible bcrypt backend in Docker
+bcrypt==4.0.1
+cffi==1.15.1

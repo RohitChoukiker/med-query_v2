@@ -4,6 +4,7 @@ import os
 from dotenv import load_dotenv
 from jose import JWTError, jwt
 from passlib.context import CryptContext
+import logging
 from fastapi import Depends, HTTPException, status, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.orm import Session
@@ -23,15 +24,40 @@ AUTH_COOKIE_NAME = os.getenv("AUTH_COOKIE_NAME", "access_token")
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+# logger for auth issues
+logger = logging.getLogger("repository.auth")
+
 
 security = HTTPBearer(auto_error=False)
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a password against its hash. Bcrypt has a 72-byte limit, so we truncate if necessary."""
     # Bcrypt has a 72-byte limit, so truncate if password is too long
-    if len(plain_password.encode('utf-8')) > 72:
-        plain_password = plain_password[:72]
-    return pwd_context.verify(plain_password, hashed_password)
+    try:
+        if len(plain_password.encode('utf-8')) > 72:
+            # truncate to bcrypt limit
+            plain_password = plain_password[:72]
+        return pwd_context.verify(plain_password, hashed_password)
+    except ValueError as e:
+        # Catch backend bcrypt ValueError about >72 bytes as an additional safety net
+        # Log a warning and try truncating explicitly then verify again
+        logger.warning("Password verification failed due to length; truncating and retrying.")
+        try:
+            truncated = plain_password.encode('utf-8')[:72].decode('utf-8', 'ignore')
+        except Exception:
+            truncated = plain_password[:72]
+        try:
+            return pwd_context.verify(truncated, hashed_password)
+        except Exception as e:
+            # If bcrypt backend is misconfigured or another error occurs, log and
+            # return False instead of letting an exception produce a 500 response.
+            logger.error("Password verification failed unexpectedly: %s", str(e))
+            return False
+    except Exception as e:
+        # Any other unexpected error (e.g., bcrypt backend import/version issues)
+        # should be logged and treated as authentication failure.
+        logger.error("Unexpected error during password verification: %s", str(e))
+        return False
 
 def get_password_hash(password: str) -> str:
     """Hash a password. Bcrypt has a 72-byte limit, so we truncate if necessary."""

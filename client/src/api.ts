@@ -1,9 +1,7 @@
 import { tokenStorage } from './utils/tokenStorage';
 
-export const BASE_URL = 'http://127.0.0.1:8000'; 
- //export const BASE_URL = 'https://medquery-1.onrender.com'; // Production
+export const BASE_URL = 'https://med-query-server-v2-371720828442.europe-west1.run.app/'; 
 
-// Type definitions for API responses
 export interface LoginResponse {
   access_token: string;
   token_type: string;

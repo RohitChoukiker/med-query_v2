@@ -1,6 +1,6 @@
 import { tokenStorage } from './utils/tokenStorage';
 
-export const BASE_URL = 'https://med-query-server-v2-371720828442.europe-west1.run.app/'; 
+export const BASE_URL = 'https://med-query-server-v2-371720828442.europe-west1.run.app'; 
 
 export interface LoginResponse {
   access_token: string;
